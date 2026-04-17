@@ -1,9 +1,10 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Redis from 'ioredis';
 import { RedisService } from '@/infrastructure/cache/redis/redis.service';
 import { CACHE_SERVICE } from '@/core/domain/interfaces/cache-service.interface';
 
+@Global()
 @Module({
   providers: [
     {
