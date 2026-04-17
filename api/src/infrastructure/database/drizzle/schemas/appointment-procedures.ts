@@ -1,6 +1,6 @@
 import { pgTable, uuid, primaryKey } from 'drizzle-orm/pg-core';
-import { appointments } from './appointments';
-import { procedures } from './procedures';
+import { appointments } from '@/infrastructure/database/drizzle/schemas/appointments';
+import { procedures } from '@/infrastructure/database/drizzle/schemas/procedures';
 
 export const appointmentProcedures = pgTable(
   'appointment_procedures',

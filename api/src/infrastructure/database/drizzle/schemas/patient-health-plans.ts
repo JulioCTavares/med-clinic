@@ -1,6 +1,6 @@
 import { pgTable, uuid, varchar, primaryKey } from 'drizzle-orm/pg-core';
-import { patients } from './patients';
-import { healthPlans } from './health-plans';
+import { patients } from '@/infrastructure/database/drizzle/schemas/patients';
+import { healthPlans } from '@/infrastructure/database/drizzle/schemas/health-plans';
 
 export const patientHealthPlans = pgTable(
   'patient_health_plans',

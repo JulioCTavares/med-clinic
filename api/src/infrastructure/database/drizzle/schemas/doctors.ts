@@ -1,6 +1,6 @@
-import { pgTable, uuid, varchar } from 'drizzle-orm/pg-core';
-import { users } from './users';
-import { specialties } from './specialties';
+import { pgTable, uuid, varchar, timestamp } from 'drizzle-orm/pg-core';
+import { users } from '@/infrastructure/database/drizzle/schemas/users';
+import { specialties } from '@/infrastructure/database/drizzle/schemas/specialties';
 
 export const doctors = pgTable('doctors', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -12,4 +12,6 @@ export const doctors = pgTable('doctors', {
   specialtyId: uuid('specialty_id')
     .notNull()
     .references(() => specialties.id),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
