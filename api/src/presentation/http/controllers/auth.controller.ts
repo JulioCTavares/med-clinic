@@ -6,6 +6,7 @@ import {
   Post,
   ConflictException,
   UnauthorizedException,
+  Req,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -16,15 +17,20 @@ import {
   ApiBadRequestResponse,
   ApiUnauthorizedResponse,
   ApiBody,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
+import type { FastifyRequest } from 'fastify';
 import { Public } from '@/infrastructure/security/decorators/public.decorator';
 import { RegisterDoctorDto } from '@/core/application/dtos/register-doctor.dto';
 import { RegisterPatientDto } from '@/core/application/dtos/register-patient.dto';
 import { LoginDto } from '@/core/application/dtos/login.dto';
+import { RefreshTokenDto } from '@/core/application/dtos/refresh-token.dto';
 import { RegisterDoctorUseCase } from '@/core/application/use-cases/register-doctor.use-case';
 import { RegisterPatientUseCase } from '@/core/application/use-cases/register-patient.use-case';
 import { LoginUseCase } from '@/core/application/use-cases/login.use-case';
-import { EmailAlreadyInUseError, InvalidCredentialsError } from '@/core/application/errors/application.error';
+import { RefreshTokenUseCase } from '@/core/application/use-cases/refresh-token.use-case';
+import { LogoutUseCase } from '@/core/application/use-cases/logout.use-case';
+import { EmailAlreadyInUseError, InvalidCredentialsError, InvalidRefreshTokenError } from '@/core/application/errors/application.error';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -33,6 +39,8 @@ export class AuthController {
     private readonly registerDoctor: RegisterDoctorUseCase,
     private readonly registerPatient: RegisterPatientUseCase,
     private readonly login: LoginUseCase,
+    private readonly refreshToken: RefreshTokenUseCase,
+    private readonly logout: LogoutUseCase,
   ) {}
 
   @Public()
@@ -123,6 +131,38 @@ export class AuthController {
         specialtyId: doctor.specialtyId,
       },
     };
+  }
+
+  @Public()
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Renovar tokens', description: 'Valida o refresh token e emite novos access token e refresh token (rotation).' })
+  @ApiBody({ type: RefreshTokenDto })
+  @ApiOkResponse({
+    description: 'Tokens renovados com sucesso.',
+    schema: {
+      example: { access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...', refresh_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' },
+    },
+  })
+  @ApiUnauthorizedResponse({ description: 'Refresh token inválido ou expirado.' })
+  async refresh(@Body() dto: RefreshTokenDto) {
+    return this.refreshToken.execute(dto).catch((err: unknown) => {
+      if (err instanceof InvalidRefreshTokenError) {
+        throw new UnauthorizedException(err.message);
+      }
+      throw err;
+    });
+  }
+
+  @ApiBearerAuth()
+  @Post('logout')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Encerrar sessão', description: 'Invalida o access token na blacklist e remove o refresh token do Redis.' })
+  @ApiOkResponse({ description: 'Logout realizado com sucesso.' })
+  @ApiUnauthorizedResponse({ description: 'Token ausente ou inválido.' })
+  async logoutUser(@Req() req: FastifyRequest) {
+    const { id, jti, exp } = req.user!;
+    await this.logout.execute({ userId: id, jti, exp });
   }
 
   @Public()

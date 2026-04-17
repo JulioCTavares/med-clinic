@@ -48,15 +48,15 @@ async function bootstrap() {
 
   const configService = app.get(ConfigService);
 
-  await app.register(fastifyCookie, {
+  await app.register(fastifyCookie as any, {
     secret: configService.get<string>('COOKIE_SECRET'),
   });
 
-  await app.register(fastifyHelmet, {
+  await app.register(fastifyHelmet as any, {
     global: true,
   });
 
-  await app.register(fastifyCors, {
+  await app.register(fastifyCors as any, {
     origin: configService.getOrThrow<string>('CORS_ORIGIN'),
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization', 'x-request-id'],

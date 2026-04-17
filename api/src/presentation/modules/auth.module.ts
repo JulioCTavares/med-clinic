@@ -12,6 +12,8 @@ import { RedisModule } from '@/infrastructure/cache/redis/redis.module';
 import { RegisterDoctorUseCase } from '@/core/application/use-cases/register-doctor.use-case';
 import { RegisterPatientUseCase } from '@/core/application/use-cases/register-patient.use-case';
 import { LoginUseCase } from '@/core/application/use-cases/login.use-case';
+import { RefreshTokenUseCase } from '@/core/application/use-cases/refresh-token.use-case';
+import { LogoutUseCase } from '@/core/application/use-cases/logout.use-case';
 import { AuthController } from '@/presentation/http/controllers/auth.controller';
 
 @Module({
@@ -24,7 +26,9 @@ import { AuthController } from '@/presentation/http/controllers/auth.controller'
     RegisterDoctorUseCase,
     RegisterPatientUseCase,
     LoginUseCase,
+    RefreshTokenUseCase,
+    LogoutUseCase,
   ],
   controllers: [AuthController],
 })
-export class AuthModule {}
+export class AuthModule { }

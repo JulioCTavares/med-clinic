@@ -10,12 +10,18 @@ export class ApplicationError extends Error {
 
 export class EmailAlreadyInUseError extends ApplicationError {
   constructor(email: string) {
-    super(`Email ${email} já está em uso`, 'EMAIL_ALREADY_IN_USE');
+    super(`Email ${email} already in use`, 'EMAIL_ALREADY_IN_USE');
   }
 }
 
 export class InvalidCredentialsError extends ApplicationError {
   constructor() {
-    super('Credenciais inválidas', 'INVALID_CREDENTIALS');
+    super('Invalid credentials', 'INVALID_CREDENTIALS');
+  }
+}
+
+export class InvalidRefreshTokenError extends ApplicationError {
+  constructor() {
+    super('Invalid refresh token', 'INVALID_REFRESH_TOKEN');
   }
 }
