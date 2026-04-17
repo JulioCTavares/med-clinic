@@ -5,20 +5,26 @@ import {
   HttpStatus,
   Post,
   ConflictException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
   ApiCreatedResponse,
+  ApiOkResponse,
   ApiConflictResponse,
   ApiBadRequestResponse,
+  ApiUnauthorizedResponse,
   ApiBody,
 } from '@nestjs/swagger';
+import { Public } from '@/infrastructure/security/decorators/public.decorator';
 import { RegisterDoctorDto } from '@/core/application/dtos/register-doctor.dto';
 import { RegisterPatientDto } from '@/core/application/dtos/register-patient.dto';
+import { LoginDto } from '@/core/application/dtos/login.dto';
 import { RegisterDoctorUseCase } from '@/core/application/use-cases/register-doctor.use-case';
 import { RegisterPatientUseCase } from '@/core/application/use-cases/register-patient.use-case';
-import { EmailAlreadyInUseError } from '@/core/application/errors/application.error';
+import { LoginUseCase } from '@/core/application/use-cases/login.use-case';
+import { EmailAlreadyInUseError, InvalidCredentialsError } from '@/core/application/errors/application.error';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -26,8 +32,40 @@ export class AuthController {
   constructor(
     private readonly registerDoctor: RegisterDoctorUseCase,
     private readonly registerPatient: RegisterPatientUseCase,
+    private readonly login: LoginUseCase,
   ) {}
 
+  @Public()
+  @Post('login')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Autenticar usuário', description: 'Verifica credenciais e retorna um Bearer token JWT.' })
+  @ApiBody({
+    type: LoginDto,
+    examples: {
+      exemplo: {
+        summary: 'Login básico',
+        value: { email: 'joao.silva@clinica.com', password: 'Senha@123' },
+      },
+    },
+  })
+  @ApiOkResponse({
+    description: 'Autenticado com sucesso.',
+    schema: {
+      example: { access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' },
+    },
+  })
+  @ApiUnauthorizedResponse({ description: 'Credenciais inválidas.' })
+  @ApiBadRequestResponse({ description: 'Payload inválido (validação Zod).' })
+  async loginUser(@Body() dto: LoginDto) {
+    return this.login.execute(dto).catch((err: unknown) => {
+      if (err instanceof InvalidCredentialsError) {
+        throw new UnauthorizedException(err.message);
+      }
+      throw err;
+    });
+  }
+
+  @Public()
   @Post('register/doctor')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Cadastrar médico', description: 'Cria um usuário com role `doctor` e o perfil de médico vinculado.' })
@@ -87,6 +125,7 @@ export class AuthController {
     };
   }
 
+  @Public()
   @Post('register/patient')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Cadastrar paciente', description: 'Cria um usuário com role `patient` e o perfil de paciente vinculado.' })

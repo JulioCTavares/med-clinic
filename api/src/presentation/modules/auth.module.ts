@@ -7,11 +7,15 @@ import { DrizzleUserRepository } from '@/infrastructure/database/repositories/us
 import { DrizzleDoctorRepository } from '@/infrastructure/database/repositories/doctor.repository';
 import { DrizzlePatientRepository } from '@/infrastructure/database/repositories/patient.repository';
 import { Argon2HashingAdapter } from '@/infrastructure/security/hashing/argon2-hashing.adapter';
+import { SecurityModule } from '@/infrastructure/security/security.module';
+import { RedisModule } from '@/infrastructure/cache/redis/redis.module';
 import { RegisterDoctorUseCase } from '@/core/application/use-cases/register-doctor.use-case';
 import { RegisterPatientUseCase } from '@/core/application/use-cases/register-patient.use-case';
+import { LoginUseCase } from '@/core/application/use-cases/login.use-case';
 import { AuthController } from '@/presentation/http/controllers/auth.controller';
 
 @Module({
+  imports: [SecurityModule, RedisModule],
   providers: [
     { provide: USER_REPOSITORY, useClass: DrizzleUserRepository },
     { provide: DOCTOR_REPOSITORY, useClass: DrizzleDoctorRepository },
@@ -19,7 +23,8 @@ import { AuthController } from '@/presentation/http/controllers/auth.controller'
     { provide: HASHING_ADAPTER, useClass: Argon2HashingAdapter },
     RegisterDoctorUseCase,
     RegisterPatientUseCase,
+    LoginUseCase,
   ],
   controllers: [AuthController],
 })
-export class AuthModule { }
+export class AuthModule {}
