@@ -13,3 +13,9 @@ export class EmailAlreadyInUseError extends ApplicationError {
     super(`Email ${email} já está em uso`, 'EMAIL_ALREADY_IN_USE');
   }
 }
+
+export class InvalidCredentialsError extends ApplicationError {
+  constructor() {
+    super('Credenciais inválidas', 'INVALID_CREDENTIALS');
+  }
+}
