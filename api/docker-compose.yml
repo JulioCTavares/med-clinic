@@ -2,6 +2,7 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: med-clinic-postgres
+    profiles: ["db", "app"]
     env_file:
       - .env
     environment:
@@ -21,6 +22,7 @@ services:
   redis:
     image: redis:7-alpine
     container_name: med-clinic-redis
+    profiles: ["db", "app"]
     ports:
       - "${REDIS_PORT}:6379"
     volumes:
@@ -36,6 +38,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: med-clinic-api
+    profiles: ["app"]
     env_file:
       - .env
     environment:
