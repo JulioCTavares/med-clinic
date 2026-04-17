@@ -1,6 +1,13 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
+import {
+  FastifyAdapter,
+  NestFastifyApplication,
+} from '@nestjs/platform-fastify';
+import { ConfigService } from '@nestjs/config';
+import fastifyCookie from '@fastify/cookie';
+import fastifyHelmet from '@fastify/helmet';
+import fastifyCors from '@fastify/cors';
 import { IncomingMessage } from 'node:http';
 import { randomUUID } from 'node:crypto';
 
@@ -36,6 +43,25 @@ async function bootstrap() {
     }),
   );
 
-  await app.listen(process.env.PORT ?? 4000);
+  const configService = app.get(ConfigService);
+
+  await app.register(fastifyCookie, {
+    secret: configService.get<string>('COOKIE_SECRET'),
+  });
+
+  await app.register(fastifyHelmet, {
+    global: true,
+  });
+
+  await app.register(fastifyCors, {
+    origin: configService.get<string>('CORS_ORIGIN') ?? '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-request-id'],
+    credentials: true,
+  });
+
+  const port = configService.get<number>('PORT') ?? 4000;
+  await app.listen(port, '0.0.0.0');
 }
-bootstrap();
+
+void bootstrap();
