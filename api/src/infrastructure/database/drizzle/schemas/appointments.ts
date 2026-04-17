@@ -1,6 +1,6 @@
 import { pgTable, uuid, varchar, date, time, boolean } from 'drizzle-orm/pg-core';
-import { patients } from './patients';
-import { doctors } from './doctors';
+import { patients } from '@/infrastructure/database/drizzle/schemas/patients';
+import { doctors } from '@/infrastructure/database/drizzle/schemas/doctors';
 
 export const appointments = pgTable('appointments', {
   id: uuid('id').primaryKey().defaultRandom(),

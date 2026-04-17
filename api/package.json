@@ -31,9 +31,11 @@
     "@nestjs/core": "^11.0.1",
     "@nestjs/jwt": "^11.0.2",
     "@nestjs/platform-fastify": "^11.1.19",
+    "@nestjs/swagger": "^11.3.0",
     "argon2": "^0.44.0",
     "dotenv": "^17.3.1",
     "drizzle-orm": "^0.45.1",
+    "fastify": "^5.8.5",
     "nestjs-zod": "^5.1.1",
     "pg": "^8.18.0",
     "reflect-metadata": "^0.2.2",
@@ -68,7 +70,10 @@
     "typescript-eslint": "^8.20.0"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["argon2", "esbuild"]
+    "onlyBuiltDependencies": [
+      "argon2",
+      "esbuild"
+    ]
   },
   "jest": {
     "moduleFileExtensions": [
@@ -85,6 +90,9 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^@/(.*)$": "<rootDir>/$1"
+    }
   }
 }
