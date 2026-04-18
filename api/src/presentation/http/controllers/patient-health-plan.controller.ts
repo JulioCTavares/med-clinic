@@ -24,8 +24,8 @@ import { ListPatientHealthPlansUseCase } from '@/core/application/use-cases/list
 import { RemovePatientHealthPlanUseCase } from '@/core/application/use-cases/remove-patient-health-plan.use-case';
 
 @ApiBearerAuth()
-@ApiTags('Pacientes / Planos de Saúde')
-@Controller('pacientes/:patientId/planos')
+@ApiTags('Patient Health Plans')
+@Controller('patients/:patientId/health-plans')
 export class PatientHealthPlanController {
   constructor(
     private readonly associate: AssociatePatientHealthPlanUseCase,

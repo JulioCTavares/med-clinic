@@ -19,6 +19,7 @@ import {
   ApiBody,
   ApiBearerAuth,
 } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import type { FastifyRequest } from 'fastify';
 import { Public } from '@/infrastructure/security/decorators/public.decorator';
 import { RegisterDoctorDto } from '@/core/application/dtos/register-doctor.dto';
@@ -44,6 +45,7 @@ export class AuthController {
   ) {}
 
   @Public()
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Autenticar usuário', description: 'Verifica credenciais e retorna um Bearer token JWT.' })
@@ -74,6 +76,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({ default: { ttl: 60_000, limit: 5 } })
   @Post('register/doctor')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Cadastrar médico', description: 'Cria um usuário com role `doctor` e o perfil de médico vinculado.' })
@@ -166,6 +169,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({ default: { ttl: 60_000, limit: 5 } })
   @Post('register/patient')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Cadastrar paciente', description: 'Cria um usuário com role `patient` e o perfil de paciente vinculado.' })

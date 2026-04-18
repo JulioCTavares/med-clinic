@@ -31,8 +31,8 @@ import { DeleteSpecialtyUseCase } from '@/core/application/use-cases/delete-spec
 import { ResourceNotFoundError } from '@/core/application/errors/application.error';
 
 @ApiBearerAuth()
-@ApiTags('Especialidades')
-@Controller('especialidades')
+@ApiTags('Specialties')
+@Controller('specialties')
 export class SpecialtyController {
   constructor(
     private readonly findAll: FindAllSpecialtiesUseCase,

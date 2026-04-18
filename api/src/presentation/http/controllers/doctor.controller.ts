@@ -29,8 +29,8 @@ import { DeleteDoctorUseCase } from '@/core/application/use-cases/delete-doctor.
 import { ResourceNotFoundError } from '@/core/application/errors/application.error';
 
 @ApiBearerAuth()
-@ApiTags('Médicos')
-@Controller('medicos')
+@ApiTags('Doctors')
+@Controller('doctors')
 export class DoctorController {
   constructor(
     private readonly findAll: FindAllDoctorsUseCase,

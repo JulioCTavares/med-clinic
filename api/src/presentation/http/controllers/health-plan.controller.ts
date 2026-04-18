@@ -31,8 +31,8 @@ import { DeleteHealthPlanUseCase } from '@/core/application/use-cases/delete-hea
 import { ResourceNotFoundError } from '@/core/application/errors/application.error';
 
 @ApiBearerAuth()
-@ApiTags('Planos de Saúde')
-@Controller('planos')
+@ApiTags('Health Plans')
+@Controller('health-plans')
 export class HealthPlanController {
   constructor(
     private readonly findAll: FindAllHealthPlansUseCase,
