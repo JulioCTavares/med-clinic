@@ -11,6 +11,7 @@ import { ProcedureModule } from '@/presentation/modules/procedure.module';
 import { DoctorModule } from '@/presentation/modules/doctor.module';
 import { PatientModule } from '@/presentation/modules/patient.module';
 import { AppointmentModule } from '@/presentation/modules/appointment.module';
+import { PatientHealthPlanModule } from '@/presentation/modules/patient-health-plan.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { AppointmentModule } from '@/presentation/modules/appointment.module';
     DoctorModule,
     PatientModule,
     AppointmentModule,
+    PatientHealthPlanModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },
