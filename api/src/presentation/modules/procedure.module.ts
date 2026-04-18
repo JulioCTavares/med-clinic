@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { PROCEDURE_REPOSITORY } from '@/core/domain/interfaces/procedure-repository.interface';
+import { CACHE_SERVICE, ICacheService } from '@/core/domain/interfaces/cache-service.interface';
 import { DrizzleProcedureRepository } from '@/infrastructure/database/repositories/procedure.repository';
+import { CachedProcedureRepository } from '@/infrastructure/cache/proxies/cached-procedure.repository';
 import { FindAllProceduresUseCase } from '@/core/application/use-cases/find-all-procedures.use-case';
 import { FindProcedureByIdUseCase } from '@/core/application/use-cases/find-procedure-by-id.use-case';
 import { CreateProcedureUseCase } from '@/core/application/use-cases/create-procedure.use-case';
@@ -10,7 +12,13 @@ import { ProcedureController } from '@/presentation/http/controllers/procedure.c
 
 @Module({
   providers: [
-    { provide: PROCEDURE_REPOSITORY, useClass: DrizzleProcedureRepository },
+    DrizzleProcedureRepository,
+    {
+      provide: PROCEDURE_REPOSITORY,
+      useFactory: (repo: DrizzleProcedureRepository, cache: ICacheService) =>
+        new CachedProcedureRepository(repo, cache),
+      inject: [DrizzleProcedureRepository, CACHE_SERVICE],
+    },
     FindAllProceduresUseCase,
     FindProcedureByIdUseCase,
     CreateProcedureUseCase,
