@@ -11,4 +11,5 @@ export const patients = pgTable('patients', {
   phones: text('phones').array(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  deletedAt: timestamp('deleted_at'),
 });

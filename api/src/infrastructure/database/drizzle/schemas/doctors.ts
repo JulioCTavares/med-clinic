@@ -14,4 +14,5 @@ export const doctors = pgTable('doctors', {
     .references(() => specialties.id),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  deletedAt: timestamp('deleted_at'),
 });
