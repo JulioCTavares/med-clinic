@@ -31,8 +31,8 @@ import { DeleteProcedureUseCase } from '@/core/application/use-cases/delete-proc
 import { ResourceNotFoundError } from '@/core/application/errors/application.error';
 
 @ApiBearerAuth()
-@ApiTags('Procedimentos')
-@Controller('procedimentos')
+@ApiTags('Procedures')
+@Controller('procedures')
 export class ProcedureController {
   constructor(
     private readonly findAll: FindAllProceduresUseCase,

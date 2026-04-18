@@ -33,8 +33,8 @@ import { DeleteAppointmentUseCase } from '@/core/application/use-cases/delete-ap
 import { AppointmentConflictError, ResourceNotFoundError } from '@/core/application/errors/application.error';
 
 @ApiBearerAuth()
-@ApiTags('Consultas')
-@Controller('consultas')
+@ApiTags('Appointments')
+@Controller('appointments')
 export class AppointmentController {
   constructor(
     private readonly createUseCase: CreateAppointmentUseCase,

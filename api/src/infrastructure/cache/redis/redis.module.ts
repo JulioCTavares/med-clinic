@@ -19,6 +19,6 @@ import { CACHE_SERVICE } from '@/core/domain/interfaces/cache-service.interface'
     RedisService,
     { provide: CACHE_SERVICE, useExisting: RedisService },
   ],
-  exports: [CACHE_SERVICE, RedisService],
+  exports: [CACHE_SERVICE, RedisService, Redis],
 })
 export class RedisModule {}
