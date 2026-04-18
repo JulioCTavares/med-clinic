@@ -8,6 +8,13 @@
       "when": 1776431065239,
       "tag": "0000_create_all_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1776524071042,
+      "tag": "0001_add_default_columns",
+      "breakpoints": true
     }
   ]
 }
