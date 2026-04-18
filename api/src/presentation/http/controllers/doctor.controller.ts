@@ -2,12 +2,14 @@ import {
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   HttpCode,
   HttpStatus,
   NotFoundException,
   Param,
   Patch,
+  Req,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -62,7 +64,14 @@ export class DoctorController {
   @ApiOperation({ summary: 'Atualizar médico (admin ou próprio médico)' })
   @ApiOkResponse({ description: 'Médico atualizado.' })
   @ApiNotFoundResponse({ description: 'Médico não encontrado.' })
-  async updateOne(@Param('id') id: string, @Body() dto: UpdateDoctorDto) {
+  async updateOne(@Param('id') id: string, @Body() dto: UpdateDoctorDto, @Req() req: any) {
+    const currentUser = req.user as { id: string; role: string };
+    if (currentUser.role === Role.DOCTOR) {
+      const doctor = await this.findById.execute(id).catch(() => null);
+      if (!doctor || doctor.userId !== currentUser.id) {
+        throw new ForbiddenException('Doctors can only update their own profile');
+      }
+    }
     return this.update.execute({ id, ...dto }).catch((err: unknown) => {
       if (err instanceof ResourceNotFoundError) throw new NotFoundException(err.message);
       throw err;
