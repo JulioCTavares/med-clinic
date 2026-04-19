@@ -1,5 +1,12 @@
 import { Controller, Get, Inject, NotFoundException, Req } from '@nestjs/common';
-import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 import type { FastifyRequest } from 'fastify';
 import { Roles } from '@/infrastructure/security/decorators/roles.decorator';
 import { Role } from '@/core/domain/enums/role.enum';
@@ -18,6 +25,8 @@ export class UserController {
   @Roles(Role.ADMIN, Role.DOCTOR, Role.PATIENT)
   @ApiOperation({ summary: 'Retornar perfil do usuário autenticado (com dados de paciente, se aplicável)' })
   @ApiOkResponse({ description: 'Perfil retornado com sucesso.' })
+  @ApiUnauthorizedResponse({ description: 'Token ausente ou inválido.' })
+  @ApiNotFoundResponse({ description: 'Paciente não encontrado para o usuário autenticado.' })
   async getMe(@Req() req: FastifyRequest) {
     const { id, email, role } = req.user!;
 

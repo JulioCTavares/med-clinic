@@ -4,6 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis';
 import Redis from 'ioredis';
+import { validateEnv } from '@/config/env.validation';
 import { DatabaseModule } from '@/infrastructure/database/database.module';
 import { RedisModule } from '@/infrastructure/cache/redis/redis.module';
 import { JwtAuthGuard } from '@/infrastructure/security/guards/jwt-auth.guard';
@@ -21,7 +22,7 @@ import { UserModule } from '@/presentation/modules/user.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({ isGlobal: true, validate: validateEnv }),
     DatabaseModule,
     RedisModule,
     ThrottlerModule.forRootAsync({
