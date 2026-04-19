@@ -99,7 +99,7 @@ describe('E2E P3 - Error Contract', () => {
   it('should return 403 with standardized error payload for forbidden access', async () => {
     const suffix = randomUUID().slice(0, 8);
     const res = await request(app.getHttpServer())
-      .post('/especialidades')
+      .post('/specialties')
       .set('Authorization', `Bearer ${patientToken}`)
       .send({ code: `ERR-${suffix}`, name: `Error Test ${suffix}` })
       .expect(403);
@@ -108,7 +108,7 @@ describe('E2E P3 - Error Contract', () => {
       statusCode: 403,
       code: expect.any(String),
       message: expect.any(String),
-      path: '/especialidades',
+      path: '/specialties',
       method: 'POST',
       requestId: expect.any(String),
       timestamp: expect.any(String),
@@ -118,7 +118,7 @@ describe('E2E P3 - Error Contract', () => {
   it('should return 404 with standardized error payload for not found resource', async () => {
     const fakeId = randomUUID();
     const res = await request(app.getHttpServer())
-      .get(`/especialidades/${fakeId}`)
+      .get(`/specialties/${fakeId}`)
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(404);
 
@@ -126,7 +126,7 @@ describe('E2E P3 - Error Contract', () => {
       statusCode: 404,
       code: expect.any(String),
       message: expect.any(String),
-      path: `/especialidades/${fakeId}`,
+      path: `/specialties/${fakeId}`,
       method: 'GET',
       requestId: expect.any(String),
       timestamp: expect.any(String),
@@ -135,7 +135,7 @@ describe('E2E P3 - Error Contract', () => {
 
   it('should return 401 with standardized error payload for missing token', async () => {
     const res = await request(app.getHttpServer())
-      .get('/medicos')
+      .get('/doctors')
       .expect(401);
 
     expect(res.body).toMatchObject({

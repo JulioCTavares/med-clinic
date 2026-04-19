@@ -6,6 +6,7 @@ export interface IPatientRepository {
   create(patient: PatientEntity): Promise<PatientEntity>;
   findAll(): Promise<PatientEntity[]>;
   findById(id: string): Promise<PatientEntity | null>;
+  findByUserId(userId: string): Promise<PatientEntity | null>;
   update(id: string, data: Partial<Pick<PatientEntity, 'name' | 'birthDate' | 'phones'>>): Promise<PatientEntity>;
   softDelete(id: string): Promise<void>;
 }

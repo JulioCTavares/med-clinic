@@ -58,6 +58,15 @@ export class DrizzlePatientRepository implements IPatientRepository {
     return row ? this.toEntity(row) : null;
   }
 
+  async findByUserId(userId: string): Promise<PatientEntity | null> {
+    const [row] = await this.db
+      .select()
+      .from(patients)
+      .where(and(eq(patients.userId, userId), active(patients)));
+
+    return row ? this.toEntity(row) : null;
+  }
+
   async update(id: string, data: Partial<Pick<PatientEntity, 'name' | 'birthDate' | 'phones'>>): Promise<PatientEntity> {
     const [row] = await this.db
       .update(patients)

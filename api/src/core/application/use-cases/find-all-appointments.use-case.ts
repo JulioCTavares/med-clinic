@@ -1,7 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { APPOINTMENT_REPOSITORY } from '@/core/domain/interfaces/appointment-repository.interface';
-import type { IAppointmentRepository } from '@/core/domain/interfaces/appointment-repository.interface';
-import { AppointmentEntity } from '@/core/domain/entities/appointment.entity';
+import type { IAppointmentRepository, AppointmentView } from '@/core/domain/interfaces/appointment-repository.interface';
 
 @Injectable()
 export class FindAllAppointmentsUseCase {
@@ -9,7 +8,7 @@ export class FindAllAppointmentsUseCase {
     @Inject(APPOINTMENT_REPOSITORY) private readonly appointmentRepository: IAppointmentRepository,
   ) {}
 
-  execute(): Promise<AppointmentEntity[]> {
-    return this.appointmentRepository.findAll();
+  execute(): Promise<AppointmentView[]> {
+    return this.appointmentRepository.findAllWithDoctor();
   }
 }
