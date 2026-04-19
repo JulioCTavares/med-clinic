@@ -37,7 +37,17 @@ async function submit() {
       <h2 class="text-h6 font-bold text-text-primary m-0">Entrar</h2>
       <p class="text-body2 text-text-secondary mt-1 mb-4">Acesse sua conta de paciente</p>
 
-      <AppErrorBanner v-if="error" :message="error" class="mb-4" />
+      <div v-if="error" class="mb-4 flex flex-col gap-2">
+        <AppErrorBanner :message="error" />
+        <p class="text-body2 text-center text-text-secondary m-0">
+          <router-link
+            to="/auth/register"
+            class="text-primary font-medium no-underline hover:underline"
+          >
+            Não tem conta? Cadastre-se como paciente
+          </router-link>
+        </p>
+      </div>
 
       <form class="flex flex-col gap-4" @submit.prevent="submit">
         <AppTextField
