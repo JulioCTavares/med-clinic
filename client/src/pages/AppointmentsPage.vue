@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import { useAuthStore } from '@/app/stores/auth.store'
 import { appointmentsApi } from '@/features/appointments/api'
+import { fetchAllPaginated } from '@/shared/lib/fetch-all-pages'
 import { mapApiError } from '@/shared/lib/error-mapper'
 import type { Appointment } from '@/entities/appointment'
 import AppPageHeader from '@/shared/ui/AppPageHeader.vue'
@@ -9,8 +9,6 @@ import AppButton from '@/shared/ui/AppButton.vue'
 import AppErrorBanner from '@/shared/ui/AppErrorBanner.vue'
 import AppSkeletonList from '@/shared/ui/AppSkeletonList.vue'
 import AppEmptyState from '@/shared/ui/AppEmptyState.vue'
-
-const authStore = useAuthStore()
 
 const allAppointments = ref<Appointment[]>([])
 const loading = ref(true)
@@ -37,10 +35,9 @@ async function load() {
   loading.value = true
   error.value = ''
   try {
-    const all = await appointmentsApi.list()
-    // Filter to show only this patient's appointments
-    const patientId = authStore.patientId
-    allAppointments.value = patientId ? all.filter((a) => a.patientId === patientId) : all
+    allAppointments.value = await fetchAllPaginated((page, limit) =>
+      appointmentsApi.list({ page, limit }),
+    )
   } catch (err) {
     error.value = mapApiError(err)
   } finally {
