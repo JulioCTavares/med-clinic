@@ -80,9 +80,9 @@ describe('E2E P3 - Patient Health Plans', () => {
     await app.close();
   });
 
-  it('should associate patient to health plan (POST /pacientes/:id/planos)', async () => {
+  it('should associate patient to health plan (POST /patients/:id/health-plans)', async () => {
     const res = await request(app.getHttpServer())
-      .post(`/pacientes/${patientProfileId}/planos`)
+      .post(`/patients/${patientProfileId}/health-plans`)
       .set('Authorization', `Bearer ${adminToken}`)
       .send({ healthPlanId, contractNumber: 'CONTRACT-001' })
       .expect(201);
@@ -92,9 +92,9 @@ describe('E2E P3 - Patient Health Plans', () => {
     expect(res.body.contractNumber).toBe('CONTRACT-001');
   });
 
-  it('should list active patient associations (GET /pacientes/:id/planos)', async () => {
+  it('should list active patient associations (GET /patients/:id/health-plans)', async () => {
     const res = await request(app.getHttpServer())
-      .get(`/pacientes/${patientProfileId}/planos`)
+      .get(`/patients/${patientProfileId}/health-plans`)
       .set('Authorization', `Bearer ${patientToken}`)
       .expect(200);
 
@@ -103,14 +103,14 @@ describe('E2E P3 - Patient Health Plans', () => {
     expect(planIds).toContain(healthPlanId);
   });
 
-  it('should remove association (DELETE /pacientes/:id/planos/:planId)', async () => {
+  it('should remove association (DELETE /patients/:id/health-plans/:healthPlanId)', async () => {
     await request(app.getHttpServer())
-      .delete(`/pacientes/${patientProfileId}/planos/${healthPlanId}`)
+      .delete(`/patients/${patientProfileId}/health-plans/${healthPlanId}`)
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(204);
 
     const res = await request(app.getHttpServer())
-      .get(`/pacientes/${patientProfileId}/planos`)
+      .get(`/patients/${patientProfileId}/health-plans`)
       .set('Authorization', `Bearer ${patientToken}`)
       .expect(200);
 

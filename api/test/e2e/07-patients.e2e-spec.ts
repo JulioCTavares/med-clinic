@@ -108,7 +108,7 @@ describe('E2E P2 - Patients', () => {
 
   it('should list patients with proper authorization (admin)', async () => {
     const res = await request(app.getHttpServer())
-      .get('/pacientes')
+      .get('/patients')
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200);
 
@@ -119,7 +119,7 @@ describe('E2E P2 - Patients', () => {
 
   it('should list patients with proper authorization (doctor)', async () => {
     const res = await request(app.getHttpServer())
-      .get('/pacientes')
+      .get('/patients')
       .set('Authorization', `Bearer ${doctorToken}`)
       .expect(200);
 
@@ -128,14 +128,14 @@ describe('E2E P2 - Patients', () => {
 
   it('should block patient from listing all patients', async () => {
     await request(app.getHttpServer())
-      .get('/pacientes')
+      .get('/patients')
       .set('Authorization', `Bearer ${patientToken}`)
       .expect(403);
   });
 
   it('should fetch patient by id with proper authorization', async () => {
     const res = await request(app.getHttpServer())
-      .get(`/pacientes/${patientProfileId}`)
+      .get(`/patients/${patientProfileId}`)
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200);
 
@@ -144,7 +144,7 @@ describe('E2E P2 - Patients', () => {
 
   it('should fetch patient by id as doctor', async () => {
     const res = await request(app.getHttpServer())
-      .get(`/pacientes/${patientProfileId}`)
+      .get(`/patients/${patientProfileId}`)
       .set('Authorization', `Bearer ${doctorToken}`)
       .expect(200);
 
@@ -153,7 +153,7 @@ describe('E2E P2 - Patients', () => {
 
   it('should update patient with proper authorization (admin)', async () => {
     const res = await request(app.getHttpServer())
-      .patch(`/pacientes/${patientProfileId}`)
+      .patch(`/patients/${patientProfileId}`)
       .set('Authorization', `Bearer ${adminToken}`)
       .send({ name: 'Patient Admin Updated' })
       .expect(200);
@@ -163,19 +163,19 @@ describe('E2E P2 - Patients', () => {
 
   it('should soft delete patient with proper authorization', async () => {
     await request(app.getHttpServer())
-      .delete(`/pacientes/${anotherPatientProfileId}`)
+      .delete(`/patients/${anotherPatientProfileId}`)
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(204);
 
     await request(app.getHttpServer())
-      .get(`/pacientes/${anotherPatientProfileId}`)
+      .get(`/patients/${anotherPatientProfileId}`)
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(404);
   });
 
   it('should block unauthorized access to patient data (no token)', async () => {
     await request(app.getHttpServer())
-      .get(`/pacientes/${patientProfileId}`)
+      .get(`/patients/${patientProfileId}`)
       .expect(401);
   });
 });
