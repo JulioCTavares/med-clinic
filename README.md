@@ -1,16 +1,16 @@
 # Med Clinic
 
-Plataforma para gestao de clinica medica com arquitetura separada entre API e aplicacao web do paciente.
+Plataforma para gestao de clinica medica com backend REST e frontend web para pacientes.
 
-O projeto cobre autenticacao JWT com refresh token, RBAC, gestao de pacientes/medicos/procedimentos/planos e fluxo de agendamentos.
+O projeto cobre autenticacao JWT (access + refresh token), RBAC, cadastro de pacientes, listagem/agendamento de consultas e gerenciamento de dados clinicos.
 
-## Visao Geral
+## Visao geral
 
-- `api/`: backend REST com NestJS + Fastify, Clean Architecture e Drizzle ORM.
-- `client/`: frontend SPA com Vue 3 + Quasar para uso do paciente.
-- `docker-compose.yml` (na API): ambiente local com PostgreSQL e Redis.
+- `api/`: backend NestJS + Fastify seguindo Clean Architecture.
+- `client/`: SPA em Vue 3 + Quasar para fluxo do paciente.
+- Banco e cache locais via Docker (`PostgreSQL` + `Redis`).
 
-## Stack Tecnologica
+## Stack tecnologica
 
 ### Backend (`api/`)
 
@@ -18,8 +18,8 @@ O projeto cobre autenticacao JWT com refresh token, RBAC, gestao de pacientes/me
 - TypeScript 5
 - PostgreSQL 16 + Drizzle ORM
 - Redis (cache e rate limiting distribuido)
-- JWT (access + refresh), Argon2
-- Zod + nestjs-zod para validacao
+- JWT + Argon2
+- Zod + nestjs-zod
 - Vitest (unitarios + E2E)
 
 ### Frontend (`client/`)
@@ -28,18 +28,18 @@ O projeto cobre autenticacao JWT com refresh token, RBAC, gestao de pacientes/me
 - TypeScript 5
 - Pinia
 - Vue Router 4
-- Axios com interceptor de autenticacao/refresh
+- Axios
 - Tailwind CSS 3
 
-## Requisitos
+## Requisitos recomendados
 
-- Node.js >= 20
-- pnpm >= 9
+- Node.js `22+` 
+- pnpm `9+`
 - Docker + Docker Compose
 
-## Como iniciar o projeto
+## Setup completo (API + Client)
 
-### 1) API
+## 1) Subir API
 
 ```bash
 cd api
@@ -48,13 +48,18 @@ pnpm install
 docker-compose --profile db up -d
 pnpm drizzle:generate
 pnpm drizzle:migrate
+pnpm seed
 pnpm start:dev
 ```
 
-API disponivel em `http://localhost:4000`  
-Swagger em `http://localhost:4000/api/docs`
+Endpoints principais locais:
 
-### 2) Client
+- API: `http://localhost:4000`
+- Swagger UI: `http://localhost:4000/docs`
+
+Importante: a rota `http://localhost:4000/api/docs` esta incorreta para esta aplicacao.
+
+## 2) Subir Client
 
 Em outro terminal:
 
@@ -65,46 +70,92 @@ pnpm install
 pnpm dev
 ```
 
-Client disponivel em `http://localhost:3000`.
+Frontend local: `http://localhost:3000`.
 
-## Testes e Qualidade
+## Fluxo pronto para paciente (cadastro e login)
 
-### API
+Com API e Client rodando:
+
+1. Acesse `http://localhost:3000/auth/register`.
+2. Crie uma conta de paciente.
+3. Faca login em `http://localhost:3000/auth/login`.
+4. Navegue por dashboard, consultas, perfil e planos.
+
+O backend tambem expoe endpoints de autenticacao no Swagger:
+
+- `POST /auth/register/patient`
+- `POST /auth/login`
+- `POST /auth/refresh`
+- `POST /auth/logout`
+
+## Seed de dados
+
+Execute na pasta `api/`:
 
 ```bash
-cd api
+pnpm seed
+```
+
+Credenciais criadas pelo seed:
+
+- Paciente: `maria.silva@test.com` / `Senha@123`
+- Paciente: `pedro.lima@test.com` / `Senha@123`
+- Admin: `admin@medclinic.com` / `Admin@123`
+
+Observacoes:
+
+- O seed e idempotente (pode rodar mais de uma vez sem duplicar dados principais).
+- O seed facilita validar login e fluxos da UI sem cadastro manual.
+
+## Compatibilidade e problemas comuns (frontend)
+
+Para evitar erros de build e dependencias:
+
+- Use Node `22+` e pnpm `9+`.
+- Nao misture `npm install` com `pnpm install` neste projeto.
+- Se houver inconsistencias (especialmente apos trocar versao do Node), rode:
+
+```bash
+cd client
+rm -rf node_modules
+pnpm install
+pnpm dev
+```
+
+Se aparecer erro de CORS no login:
+
+- Confirme em `api/.env` que `CORS_ORIGIN=http://localhost:3000`.
+- Reinicie a API apos alterar variaveis.
+
+## Testes e cobertura da API
+
+Na pasta `api/`:
+
+```bash
 pnpm test
 pnpm test:e2e
 pnpm test:cov
 ```
 
-Cobertura atual da API (Vitest + V8):
+Cobertura atual (Vitest + V8):
 
 - Statements: `83.21%` (471/566)
 - Branches: `79.22%` (122/154)
 - Functions: `77.77%` (154/198)
 - Lines: `87.22%` (437/501)
 
-Baseado na execucao de `pnpm test:cov` na branch `feat/create-client-integration-clean`.
-
-## Estrutura do Repositorio
+## Estrutura do repositorio
 
 ```text
 med-clinic/
-├── api/      # API NestJS (dominio, aplicacao, infraestrutura, apresentacao)
-└── client/   # SPA Vue/Quasar para pacientes
+├── api/      # Backend NestJS
+└── client/   # Frontend Vue/Quasar
 ```
 
 ## Fluxo recomendado de desenvolvimento
 
 1. Criar branch a partir de `dev`.
 2. Fazer commits pequenos e descritivos por contexto.
-3. Rodar `pnpm test` e `pnpm test:e2e` na API antes do push.
+3. Rodar testes da API antes do push.
 4. Abrir PR para `dev` com resumo funcional e plano de teste.
-
-## Contribuicao
-
-Atualmente, a arvore desta branch foi padronizada para manter os commits com autor:
-
-- `Julio Tavares <juliotavares197@gmail.com>`
 
