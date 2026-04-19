@@ -17,6 +17,9 @@ if (existsSync(envTestPath)) {
 if (process.env.DATABASE_URL_E2E) {
   process.env.DATABASE_URL = process.env.DATABASE_URL_E2E;
 }
+if (process.env.REDIS_DB_E2E) {
+  process.env.REDIS_DB = process.env.REDIS_DB_E2E;
+}
 process.env.NODE_ENV = 'test';
 
 export default defineConfig({

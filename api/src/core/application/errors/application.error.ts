@@ -43,3 +43,9 @@ export class CodeAlreadyInUseError extends ApplicationError {
     super(`${resource} with code ${code} already in use`, 'CODE_ALREADY_IN_USE');
   }
 }
+
+export class AdminCreationRestrictedError extends ApplicationError {
+  constructor() {
+    super('Admin users can only be created via seed', 'ADMIN_CREATION_RESTRICTED');
+  }
+}
