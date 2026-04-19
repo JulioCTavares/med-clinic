@@ -1,7 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { eq, and } from 'drizzle-orm';
-import { IHealthPlanRepository } from '@/core/domain/interfaces/health-plan-repository.interface';
+import { eq, and, ilike, count } from 'drizzle-orm';
+import { IHealthPlanRepository, HealthPlanFilters } from '@/core/domain/interfaces/health-plan-repository.interface';
 import { HealthPlanEntity } from '@/core/domain/entities/health-plan.entity';
+import type { PaginatedResult } from '@/common/types/paginated-result';
 import { DRIZZLE_DB } from '@/infrastructure/database/database.module';
 import type { DrizzleDB } from '@/infrastructure/database/drizzle/drizzle.factory';
 import { healthPlans } from '@/infrastructure/database/drizzle/schemas';
@@ -26,6 +27,23 @@ export class DrizzleHealthPlanRepository implements IHealthPlanRepository {
   async findAll(): Promise<HealthPlanEntity[]> {
     const rows = await this.db.select().from(healthPlans).where(active(healthPlans));
     return rows.map((r) => this.toEntity(r));
+  }
+
+  async findPaginated(params: HealthPlanFilters): Promise<PaginatedResult<HealthPlanEntity>> {
+    const conditions = [active(healthPlans)];
+    if (params.code) conditions.push(ilike(healthPlans.code, `%${params.code}%`));
+    if (params.description) conditions.push(ilike(healthPlans.description, `%${params.description}%`));
+
+    const where = and(...conditions);
+    const offset = (params.page - 1) * params.limit;
+
+    const [{ total }] = await this.db.select({ total: count() }).from(healthPlans).where(where);
+    const rows = await this.db.select().from(healthPlans).where(where).limit(params.limit).offset(offset);
+
+    return {
+      data: rows.map((r) => this.toEntity(r)),
+      meta: { total, page: params.page, limit: params.limit, totalPages: Math.ceil(total / params.limit) },
+    };
   }
 
   async findById(id: string): Promise<HealthPlanEntity | null> {

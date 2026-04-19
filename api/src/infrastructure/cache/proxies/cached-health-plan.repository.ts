@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
-import type { IHealthPlanRepository } from '@/core/domain/interfaces/health-plan-repository.interface';
+import type { IHealthPlanRepository, HealthPlanFilters } from '@/core/domain/interfaces/health-plan-repository.interface';
 import type { HealthPlanEntity } from '@/core/domain/entities/health-plan.entity';
+import type { PaginatedResult } from '@/common/types/paginated-result';
 import { CACHE_SERVICE } from '@/core/domain/interfaces/cache-service.interface';
 import type { ICacheService } from '@/core/domain/interfaces/cache-service.interface';
 import { CacheKeys } from '@/common/cache/cache-keys';
@@ -21,6 +22,10 @@ export class CachedHealthPlanRepository implements IHealthPlanRepository {
     const entities = await this.real.findAll();
     await this.cache.set(CacheKeys.planoList(), JSON.stringify(entities), TTL);
     return entities;
+  }
+
+  findPaginated(params: HealthPlanFilters): Promise<PaginatedResult<HealthPlanEntity>> {
+    return this.real.findPaginated(params);
   }
 
   async findById(id: string): Promise<HealthPlanEntity | null> {

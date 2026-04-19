@@ -9,6 +9,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -17,12 +18,14 @@ import {
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 import { Roles } from '@/infrastructure/security/decorators/roles.decorator';
 import { Role } from '@/core/domain/enums/role.enum';
 import { CreateSpecialtyDto } from '@/core/application/dtos/create-specialty.dto';
 import { UpdateSpecialtyDto } from '@/core/application/dtos/update-specialty.dto';
+import { ListSpecialtiesDto } from '@/core/application/dtos/list-specialties.dto';
 import { FindAllSpecialtiesUseCase } from '@/core/application/use-cases/find-all-specialties.use-case';
 import { FindSpecialtyByIdUseCase } from '@/core/application/use-cases/find-specialty-by-id.use-case';
 import { CreateSpecialtyUseCase } from '@/core/application/use-cases/create-specialty.use-case';
@@ -44,10 +47,14 @@ export class SpecialtyController {
 
   @Get()
   @Roles(Role.ADMIN, Role.DOCTOR, Role.PATIENT)
-  @ApiOperation({ summary: 'Listar especialidades' })
-  @ApiOkResponse({ description: 'Lista retornada com sucesso.' })
-  listAll() {
-    return this.findAll.execute();
+  @ApiOperation({ summary: 'Listar especialidades com paginação e filtros' })
+  @ApiOkResponse({ description: 'Lista paginada retornada com sucesso.' })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'name', required: false, type: String })
+  @ApiQuery({ name: 'code', required: false, type: String })
+  listAll(@Query() query: ListSpecialtiesDto) {
+    return this.findAll.execute(query);
   }
 
   @Get(':id')

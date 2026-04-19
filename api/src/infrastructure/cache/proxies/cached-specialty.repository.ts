@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
-import type { ISpecialtyRepository } from '@/core/domain/interfaces/specialty-repository.interface';
+import type { ISpecialtyRepository, SpecialtyFilters } from '@/core/domain/interfaces/specialty-repository.interface';
 import type { SpecialtyEntity } from '@/core/domain/entities/specialty.entity';
+import type { PaginatedResult } from '@/common/types/paginated-result';
 import { CACHE_SERVICE } from '@/core/domain/interfaces/cache-service.interface';
 import type { ICacheService } from '@/core/domain/interfaces/cache-service.interface';
 import { CacheKeys } from '@/common/cache/cache-keys';
@@ -22,6 +23,10 @@ export class CachedSpecialtyRepository implements ISpecialtyRepository {
     const entities = await this.real.findAll();
     await this.cache.set(CacheKeys.especialidadeList(), JSON.stringify(entities), TTL_LIST);
     return entities;
+  }
+
+  findPaginated(params: SpecialtyFilters): Promise<PaginatedResult<SpecialtyEntity>> {
+    return this.real.findPaginated(params);
   }
 
   async findById(id: string): Promise<SpecialtyEntity | null> {

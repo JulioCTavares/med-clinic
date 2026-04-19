@@ -9,6 +9,7 @@ import {
   NotFoundException,
   Param,
   Patch,
+  Query,
   Req,
 } from '@nestjs/common';
 import {
@@ -17,11 +18,13 @@ import {
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 import { Roles } from '@/infrastructure/security/decorators/roles.decorator';
 import { Role } from '@/core/domain/enums/role.enum';
 import { UpdateDoctorDto } from '@/core/application/dtos/update-doctor.dto';
+import { ListDoctorsDto } from '@/core/application/dtos/list-doctors.dto';
 import { FindAllDoctorsUseCase } from '@/core/application/use-cases/find-all-doctors.use-case';
 import { FindDoctorByIdUseCase } from '@/core/application/use-cases/find-doctor-by-id.use-case';
 import { UpdateDoctorUseCase } from '@/core/application/use-cases/update-doctor.use-case';
@@ -41,10 +44,14 @@ export class DoctorController {
 
   @Get()
   @Roles(Role.ADMIN, Role.DOCTOR, Role.PATIENT)
-  @ApiOperation({ summary: 'Listar médicos' })
-  @ApiOkResponse({ description: 'Lista retornada com sucesso.' })
-  listAll() {
-    return this.findAll.execute();
+  @ApiOperation({ summary: 'Listar médicos com paginação e filtros' })
+  @ApiOkResponse({ description: 'Lista paginada retornada com sucesso.' })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'name', required: false, type: String })
+  @ApiQuery({ name: 'specialtyId', required: false, type: String })
+  listAll(@Query() query: ListDoctorsDto) {
+    return this.findAll.execute(query);
   }
 
   @Get(':id')
