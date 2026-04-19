@@ -9,6 +9,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -17,12 +18,14 @@ import {
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 import { Roles } from '@/infrastructure/security/decorators/roles.decorator';
 import { Role } from '@/core/domain/enums/role.enum';
 import { CreateHealthPlanDto } from '@/core/application/dtos/create-health-plan.dto';
 import { UpdateHealthPlanDto } from '@/core/application/dtos/update-health-plan.dto';
+import { ListHealthPlansDto } from '@/core/application/dtos/list-health-plans.dto';
 import { FindAllHealthPlansUseCase } from '@/core/application/use-cases/find-all-health-plans.use-case';
 import { FindHealthPlanByIdUseCase } from '@/core/application/use-cases/find-health-plan-by-id.use-case';
 import { CreateHealthPlanUseCase } from '@/core/application/use-cases/create-health-plan.use-case';
@@ -44,10 +47,14 @@ export class HealthPlanController {
 
   @Get()
   @Roles(Role.ADMIN, Role.DOCTOR, Role.PATIENT)
-  @ApiOperation({ summary: 'Listar planos de saúde' })
-  @ApiOkResponse({ description: 'Lista retornada com sucesso.' })
-  listAll() {
-    return this.findAll.execute();
+  @ApiOperation({ summary: 'Listar planos de saúde com paginação e filtros' })
+  @ApiOkResponse({ description: 'Lista paginada retornada com sucesso.' })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'code', required: false, type: String })
+  @ApiQuery({ name: 'description', required: false, type: String })
+  listAll(@Query() query: ListHealthPlansDto) {
+    return this.findAll.execute(query);
   }
 
   @Get(':id')
