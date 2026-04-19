@@ -1,8 +1,18 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
+import { AppModule } from '@/app.module';
+import {
+  FastifyAdapter,
+  NestFastifyApplication,
+} from '@nestjs/platform-fastify';
+import { ConfigService } from '@nestjs/config';
+import fastifyCookie from '@fastify/cookie';
+import fastifyHelmet from '@fastify/helmet';
+import fastifyCors from '@fastify/cors';
 import { IncomingMessage } from 'node:http';
 import { randomUUID } from 'node:crypto';
+import { ZodValidationPipe } from 'nestjs-zod';
+import { HttpExceptionFilter } from '@/presentation/http/filters/http-exception.filter';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -36,6 +46,45 @@ async function bootstrap() {
     }),
   );
 
-  await app.listen(process.env.PORT ?? 4000);
+  const configService = app.get(ConfigService);
+
+  await app.register(fastifyCookie as any, {
+    secret: configService.get<string>('COOKIE_SECRET'),
+  });
+
+  await app.register(fastifyHelmet as any, {
+    global: true,
+  });
+
+  await app.register(fastifyCors as any, {
+    origin: configService.getOrThrow<string>('CORS_ORIGIN'),
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-request-id'],
+    credentials: true,
+  });
+
+  app.useGlobalPipes(new ZodValidationPipe());
+  app.useGlobalFilters(new HttpExceptionFilter());
+
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('Med Clinic API')
+    .setDescription(
+      'API de gestão de clínica médica — Clean Architecture + NestJS + Fastify + Drizzle ORM',
+    )
+    .setVersion('1.0')
+    .addBearerAuth(
+      { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+      'access-token',
+    )
+    .build();
+
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup('docs', app, document, {
+    swaggerOptions: { persistAuthorization: true },
+  });
+
+  const port = configService.get<number>('PORT') ?? 4000;
+  await app.listen(port, '0.0.0.0');
 }
-bootstrap();
+
+void bootstrap();

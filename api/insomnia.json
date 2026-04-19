@@ -1,0 +1,547 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2026-04-18T00:00:00.000Z",
+  "__export_source": "med-clinic-api",
+  "resources": [
+    {
+      "_id": "wrk_med_clinic",
+      "_type": "workspace",
+      "name": "Med Clinic API",
+      "description": "NestJS + Fastify — Clean Architecture"
+    },
+    {
+      "_id": "env_base",
+      "_type": "environment",
+      "parentId": "wrk_med_clinic",
+      "name": "Base Environment",
+      "data": {
+        "base_url": "http://localhost:4000",
+        "access_token": "",
+        "refresh_token": "",
+        "doctor_id": "",
+        "patient_id": "",
+        "specialty_id": "",
+        "health_plan_id": "",
+        "procedure_id": "",
+        "appointment_id": ""
+      }
+    },
+    {
+      "_id": "fld_auth",
+      "_type": "request_group",
+      "parentId": "wrk_med_clinic",
+      "name": "Auth"
+    },
+    {
+      "_id": "fld_doctors",
+      "_type": "request_group",
+      "parentId": "wrk_med_clinic",
+      "name": "Doctors"
+    },
+    {
+      "_id": "fld_patients",
+      "_type": "request_group",
+      "parentId": "wrk_med_clinic",
+      "name": "Patients"
+    },
+    {
+      "_id": "fld_appointments",
+      "_type": "request_group",
+      "parentId": "wrk_med_clinic",
+      "name": "Appointments"
+    },
+    {
+      "_id": "fld_specialties",
+      "_type": "request_group",
+      "parentId": "wrk_med_clinic",
+      "name": "Specialties"
+    },
+    {
+      "_id": "fld_health_plans",
+      "_type": "request_group",
+      "parentId": "wrk_med_clinic",
+      "name": "Health Plans"
+    },
+    {
+      "_id": "fld_procedures",
+      "_type": "request_group",
+      "parentId": "wrk_med_clinic",
+      "name": "Procedures"
+    },
+    {
+      "_id": "fld_patient_health_plans",
+      "_type": "request_group",
+      "parentId": "wrk_med_clinic",
+      "name": "Patient Health Plans"
+    },
+
+    {
+      "_id": "req_auth_login",
+      "_type": "request",
+      "parentId": "fld_auth",
+      "name": "Login",
+      "method": "POST",
+      "url": "{{ _.base_url }}/auth/login",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"admin@clinica.com\",\n  \"password\": \"Senha@123\"\n}"
+      }
+    },
+    {
+      "_id": "req_auth_register_doctor",
+      "_type": "request",
+      "parentId": "fld_auth",
+      "name": "Register Doctor",
+      "method": "POST",
+      "url": "{{ _.base_url }}/auth/register/doctor",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"joao.silva@clinica.com\",\n  \"password\": \"Senha@123\",\n  \"name\": \"Dr. João Silva\",\n  \"crm\": \"CRM/SP 123456\",\n  \"specialtyId\": \"{{ _.specialty_id }}\"\n}"
+      }
+    },
+    {
+      "_id": "req_auth_register_patient",
+      "_type": "request",
+      "parentId": "fld_auth",
+      "name": "Register Patient",
+      "method": "POST",
+      "url": "{{ _.base_url }}/auth/register/patient",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"maria.souza@email.com\",\n  \"password\": \"Senha@123\",\n  \"name\": \"Maria Souza\",\n  \"birthDate\": \"1990-05-15\",\n  \"phones\": [\"(11) 91234-5678\"]\n}"
+      }
+    },
+    {
+      "_id": "req_auth_refresh",
+      "_type": "request",
+      "parentId": "fld_auth",
+      "name": "Refresh Token",
+      "method": "POST",
+      "url": "{{ _.base_url }}/auth/refresh",
+      "headers": [{ "name": "Content-Type", "value": "application/json" }],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"refresh_token\": \"{{ _.refresh_token }}\"\n}"
+      }
+    },
+    {
+      "_id": "req_auth_logout",
+      "_type": "request",
+      "parentId": "fld_auth",
+      "name": "Logout",
+      "method": "POST",
+      "url": "{{ _.base_url }}/auth/logout",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ],
+      "body": { "mimeType": "application/json", "text": "" }
+    },
+
+    {
+      "_id": "req_doctors_list",
+      "_type": "request",
+      "parentId": "fld_doctors",
+      "name": "List Doctors",
+      "method": "GET",
+      "url": "{{ _.base_url }}/doctors",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ]
+    },
+    {
+      "_id": "req_doctors_get",
+      "_type": "request",
+      "parentId": "fld_doctors",
+      "name": "Get Doctor by ID",
+      "method": "GET",
+      "url": "{{ _.base_url }}/doctors/{{ _.doctor_id }}",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ]
+    },
+    {
+      "_id": "req_doctors_update",
+      "_type": "request",
+      "parentId": "fld_doctors",
+      "name": "Update Doctor",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/doctors/{{ _.doctor_id }}",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" },
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Dr. João da Silva Atualizado\",\n  \"crm\": \"CRM/SP 654321\",\n  \"specialtyId\": \"{{ _.specialty_id }}\"\n}"
+      }
+    },
+    {
+      "_id": "req_doctors_delete",
+      "_type": "request",
+      "parentId": "fld_doctors",
+      "name": "Delete Doctor",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/doctors/{{ _.doctor_id }}",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ]
+    },
+
+    {
+      "_id": "req_patients_list",
+      "_type": "request",
+      "parentId": "fld_patients",
+      "name": "List Patients",
+      "method": "GET",
+      "url": "{{ _.base_url }}/patients",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ]
+    },
+    {
+      "_id": "req_patients_get",
+      "_type": "request",
+      "parentId": "fld_patients",
+      "name": "Get Patient by ID",
+      "method": "GET",
+      "url": "{{ _.base_url }}/patients/{{ _.patient_id }}",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ]
+    },
+    {
+      "_id": "req_patients_update",
+      "_type": "request",
+      "parentId": "fld_patients",
+      "name": "Update Patient",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/patients/{{ _.patient_id }}",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" },
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Maria Souza Atualizada\",\n  \"birthDate\": \"1990-05-15\",\n  \"phones\": [\"(11) 99999-0000\"]\n}"
+      }
+    },
+    {
+      "_id": "req_patients_delete",
+      "_type": "request",
+      "parentId": "fld_patients",
+      "name": "Delete Patient",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/patients/{{ _.patient_id }}",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ]
+    },
+
+    {
+      "_id": "req_appointments_create",
+      "_type": "request",
+      "parentId": "fld_appointments",
+      "name": "Create Appointment",
+      "method": "POST",
+      "url": "{{ _.base_url }}/appointments",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" },
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"code\": \"CONS-2026-001\",\n  \"date\": \"2026-05-10\",\n  \"time\": \"09:00\",\n  \"isPrivate\": false,\n  \"patientId\": \"{{ _.patient_id }}\",\n  \"doctorId\": \"{{ _.doctor_id }}\",\n  \"procedureIds\": [\"{{ _.procedure_id }}\"]\n}"
+      }
+    },
+    {
+      "_id": "req_appointments_list",
+      "_type": "request",
+      "parentId": "fld_appointments",
+      "name": "List Appointments",
+      "method": "GET",
+      "url": "{{ _.base_url }}/appointments",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ]
+    },
+    {
+      "_id": "req_appointments_get",
+      "_type": "request",
+      "parentId": "fld_appointments",
+      "name": "Get Appointment by ID",
+      "method": "GET",
+      "url": "{{ _.base_url }}/appointments/{{ _.appointment_id }}",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ]
+    },
+    {
+      "_id": "req_appointments_update",
+      "_type": "request",
+      "parentId": "fld_appointments",
+      "name": "Update Appointment",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/appointments/{{ _.appointment_id }}",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" },
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"status\": \"confirmed\",\n  \"date\": \"2026-05-10\",\n  \"time\": \"10:00\",\n  \"isPrivate\": false\n}"
+      }
+    },
+    {
+      "_id": "req_appointments_delete",
+      "_type": "request",
+      "parentId": "fld_appointments",
+      "name": "Delete Appointment",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/appointments/{{ _.appointment_id }}",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ]
+    },
+
+    {
+      "_id": "req_specialties_list",
+      "_type": "request",
+      "parentId": "fld_specialties",
+      "name": "List Specialties",
+      "method": "GET",
+      "url": "{{ _.base_url }}/specialties",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ]
+    },
+    {
+      "_id": "req_specialties_get",
+      "_type": "request",
+      "parentId": "fld_specialties",
+      "name": "Get Specialty by ID",
+      "method": "GET",
+      "url": "{{ _.base_url }}/specialties/{{ _.specialty_id }}",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ]
+    },
+    {
+      "_id": "req_specialties_create",
+      "_type": "request",
+      "parentId": "fld_specialties",
+      "name": "Create Specialty",
+      "method": "POST",
+      "url": "{{ _.base_url }}/specialties",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" },
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"code\": \"CARD\",\n  \"name\": \"Cardiologia\"\n}"
+      }
+    },
+    {
+      "_id": "req_specialties_update",
+      "_type": "request",
+      "parentId": "fld_specialties",
+      "name": "Update Specialty",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/specialties/{{ _.specialty_id }}",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" },
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Cardiologia Intervencionista\"\n}"
+      }
+    },
+    {
+      "_id": "req_specialties_delete",
+      "_type": "request",
+      "parentId": "fld_specialties",
+      "name": "Delete Specialty",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/specialties/{{ _.specialty_id }}",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ]
+    },
+
+    {
+      "_id": "req_health_plans_list",
+      "_type": "request",
+      "parentId": "fld_health_plans",
+      "name": "List Health Plans",
+      "method": "GET",
+      "url": "{{ _.base_url }}/health-plans",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ]
+    },
+    {
+      "_id": "req_health_plans_get",
+      "_type": "request",
+      "parentId": "fld_health_plans",
+      "name": "Get Health Plan by ID",
+      "method": "GET",
+      "url": "{{ _.base_url }}/health-plans/{{ _.health_plan_id }}",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ]
+    },
+    {
+      "_id": "req_health_plans_create",
+      "_type": "request",
+      "parentId": "fld_health_plans",
+      "name": "Create Health Plan",
+      "method": "POST",
+      "url": "{{ _.base_url }}/health-plans",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" },
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"code\": \"UNIMED-001\",\n  \"description\": \"Unimed Nacional — Cobertura Completa\",\n  \"phone\": \"0800 722 4848\"\n}"
+      }
+    },
+    {
+      "_id": "req_health_plans_update",
+      "_type": "request",
+      "parentId": "fld_health_plans",
+      "name": "Update Health Plan",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/health-plans/{{ _.health_plan_id }}",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" },
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"description\": \"Unimed Nacional — Cobertura Completa Atualizada\",\n  \"phone\": \"0800 722 9999\"\n}"
+      }
+    },
+    {
+      "_id": "req_health_plans_delete",
+      "_type": "request",
+      "parentId": "fld_health_plans",
+      "name": "Delete Health Plan",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/health-plans/{{ _.health_plan_id }}",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ]
+    },
+
+    {
+      "_id": "req_procedures_list",
+      "_type": "request",
+      "parentId": "fld_procedures",
+      "name": "List Procedures",
+      "method": "GET",
+      "url": "{{ _.base_url }}/procedures",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ]
+    },
+    {
+      "_id": "req_procedures_get",
+      "_type": "request",
+      "parentId": "fld_procedures",
+      "name": "Get Procedure by ID",
+      "method": "GET",
+      "url": "{{ _.base_url }}/procedures/{{ _.procedure_id }}",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ]
+    },
+    {
+      "_id": "req_procedures_create",
+      "_type": "request",
+      "parentId": "fld_procedures",
+      "name": "Create Procedure",
+      "method": "POST",
+      "url": "{{ _.base_url }}/procedures",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" },
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"code\": \"ECG-001\",\n  \"name\": \"Eletrocardiograma\",\n  \"value\": \"150.00\"\n}"
+      }
+    },
+    {
+      "_id": "req_procedures_update",
+      "_type": "request",
+      "parentId": "fld_procedures",
+      "name": "Update Procedure",
+      "method": "PATCH",
+      "url": "{{ _.base_url }}/procedures/{{ _.procedure_id }}",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" },
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"value\": \"175.00\"\n}"
+      }
+    },
+    {
+      "_id": "req_procedures_delete",
+      "_type": "request",
+      "parentId": "fld_procedures",
+      "name": "Delete Procedure",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/procedures/{{ _.procedure_id }}",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ]
+    },
+
+    {
+      "_id": "req_php_associate",
+      "_type": "request",
+      "parentId": "fld_patient_health_plans",
+      "name": "Associate Health Plan to Patient",
+      "method": "POST",
+      "url": "{{ _.base_url }}/patients/{{ _.patient_id }}/health-plans",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" },
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"healthPlanId\": \"{{ _.health_plan_id }}\",\n  \"contractNumber\": \"UNIMED-2026-000001\"\n}"
+      }
+    },
+    {
+      "_id": "req_php_list",
+      "_type": "request",
+      "parentId": "fld_patient_health_plans",
+      "name": "List Patient Health Plans",
+      "method": "GET",
+      "url": "{{ _.base_url }}/patients/{{ _.patient_id }}/health-plans",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ]
+    },
+    {
+      "_id": "req_php_delete",
+      "_type": "request",
+      "parentId": "fld_patient_health_plans",
+      "name": "Remove Patient Health Plan",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/patients/{{ _.patient_id }}/health-plans/{{ _.health_plan_id }}",
+      "headers": [
+        { "name": "Authorization", "value": "Bearer {{ _.access_token }}" }
+      ]
+    }
+  ]
+}
