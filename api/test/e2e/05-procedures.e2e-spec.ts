@@ -77,7 +77,7 @@ describe('E2E P1 - Procedures', () => {
     procedureCode = `PROC-${suffix}`;
 
     const res = await request(app.getHttpServer())
-      .post('/procedimentos')
+      .post('/procedures')
       .set('Authorization', `Bearer ${adminToken}`)
       .send({ code: procedureCode, name: `Procedure ${suffix}`, value: '250.00' })
       .expect(201);
@@ -91,7 +91,7 @@ describe('E2E P1 - Procedures', () => {
   it('should return 403 for non-admin creating procedure', async () => {
     const suffix = randomUUID().slice(0, 8);
     await request(app.getHttpServer())
-      .post('/procedimentos')
+      .post('/procedures')
       .set('Authorization', `Bearer ${patientToken}`)
       .send({ code: `PROC-DENIED-${suffix}`, name: `Denied ${suffix}`, value: '100.00' })
       .expect(403);
@@ -99,7 +99,7 @@ describe('E2E P1 - Procedures', () => {
 
   it('should list active procedures', async () => {
     const res = await request(app.getHttpServer())
-      .get('/procedimentos')
+      .get('/procedures')
       .set('Authorization', `Bearer ${patientToken}`)
       .expect(200);
 
@@ -110,7 +110,7 @@ describe('E2E P1 - Procedures', () => {
 
   it('should fetch procedure by id', async () => {
     const res = await request(app.getHttpServer())
-      .get(`/procedimentos/${procedureId}`)
+      .get(`/procedures/${procedureId}`)
       .set('Authorization', `Bearer ${patientToken}`)
       .expect(200);
 
@@ -120,7 +120,7 @@ describe('E2E P1 - Procedures', () => {
 
   it('should update procedure with authorized role', async () => {
     const res = await request(app.getHttpServer())
-      .patch(`/procedimentos/${procedureId}`)
+      .patch(`/procedures/${procedureId}`)
       .set('Authorization', `Bearer ${adminToken}`)
       .send({ value: '300.00' })
       .expect(200);
@@ -130,14 +130,14 @@ describe('E2E P1 - Procedures', () => {
 
   it('should soft delete procedure with authorized role', async () => {
     await request(app.getHttpServer())
-      .delete(`/procedimentos/${procedureId}`)
+      .delete(`/procedures/${procedureId}`)
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(204);
   });
 
   it('should not list soft-deleted procedure', async () => {
     const res = await request(app.getHttpServer())
-      .get('/procedimentos')
+      .get('/procedures')
       .set('Authorization', `Bearer ${patientToken}`)
       .expect(200);
 
@@ -147,7 +147,7 @@ describe('E2E P1 - Procedures', () => {
 
   it('should return not found for GET by id of soft-deleted procedure', async () => {
     await request(app.getHttpServer())
-      .get(`/procedimentos/${procedureId}`)
+      .get(`/procedures/${procedureId}`)
       .set('Authorization', `Bearer ${patientToken}`)
       .expect(404);
   });

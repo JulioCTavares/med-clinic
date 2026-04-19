@@ -100,7 +100,7 @@ describe('E2E P2 - Doctors', () => {
 
   it('should list doctors', async () => {
     const res = await request(app.getHttpServer())
-      .get('/medicos')
+      .get('/doctors')
       .set('Authorization', `Bearer ${doctorToken}`)
       .expect(200);
 
@@ -111,7 +111,7 @@ describe('E2E P2 - Doctors', () => {
 
   it('should fetch doctor by id', async () => {
     const res = await request(app.getHttpServer())
-      .get(`/medicos/${doctorProfileId}`)
+      .get(`/doctors/${doctorProfileId}`)
       .set('Authorization', `Bearer ${doctorToken}`)
       .expect(200);
 
@@ -122,7 +122,7 @@ describe('E2E P2 - Doctors', () => {
     const suffix = randomUUID().slice(0, 8);
 
     const res = await request(app.getHttpServer())
-      .patch(`/medicos/${anotherDoctorProfileId}`)
+      .patch(`/doctors/${anotherDoctorProfileId}`)
       .set('Authorization', `Bearer ${adminToken}`)
       .send({ name: `Admin Updated ${suffix}` })
       .expect(200);
@@ -134,7 +134,7 @@ describe('E2E P2 - Doctors', () => {
     const suffix = randomUUID().slice(0, 8);
 
     const res = await request(app.getHttpServer())
-      .patch(`/medicos/${doctorProfileId}`)
+      .patch(`/doctors/${doctorProfileId}`)
       .set('Authorization', `Bearer ${doctorToken}`)
       .send({ name: `Self Updated ${suffix}` })
       .expect(200);
@@ -144,7 +144,7 @@ describe('E2E P2 - Doctors', () => {
 
   it('should block doctor update for another doctor id', async () => {
     await request(app.getHttpServer())
-      .patch(`/medicos/${anotherDoctorProfileId}`)
+      .patch(`/doctors/${anotherDoctorProfileId}`)
       .set('Authorization', `Bearer ${doctorToken}`)
       .send({ name: 'Unauthorized Update' })
       .expect(403);
@@ -152,12 +152,12 @@ describe('E2E P2 - Doctors', () => {
 
   it('should soft delete doctor as admin', async () => {
     await request(app.getHttpServer())
-      .delete(`/medicos/${anotherDoctorProfileId}`)
+      .delete(`/doctors/${anotherDoctorProfileId}`)
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(204);
 
     await request(app.getHttpServer())
-      .get(`/medicos/${anotherDoctorProfileId}`)
+      .get(`/doctors/${anotherDoctorProfileId}`)
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(404);
   });

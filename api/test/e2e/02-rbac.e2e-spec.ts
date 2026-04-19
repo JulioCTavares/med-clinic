@@ -118,7 +118,7 @@ describe('E2E P0 - RBAC', () => {
     const suffix = randomUUID().slice(0, 8);
 
     await request(app.getHttpServer())
-      .post('/especialidades')
+      .post('/specialties')
       .set('Authorization', `Bearer ${patientToken}`)
       .send({ code: `FORBIDDEN-${suffix}`, name: `Forbidden ${suffix}` })
       .expect(403);
@@ -126,7 +126,7 @@ describe('E2E P0 - RBAC', () => {
 
   it('should return 401 when request has no token', async () => {
     await request(app.getHttpServer())
-      .get('/medicos')
+      .get('/doctors')
       .expect(401);
   });
 
@@ -134,7 +134,7 @@ describe('E2E P0 - RBAC', () => {
     const suffix = randomUUID().slice(0, 8);
 
     const res = await request(app.getHttpServer())
-      .patch(`/medicos/${doctor1ProfileId}`)
+      .patch(`/doctors/${doctor1ProfileId}`)
       .set('Authorization', `Bearer ${doctor1Token}`)
       .send({ name: `Doctor One Updated ${suffix}` })
       .expect(200);
@@ -144,7 +144,7 @@ describe('E2E P0 - RBAC', () => {
 
   it('should block doctor from updating another doctor profile', async () => {
     await request(app.getHttpServer())
-      .patch(`/medicos/${doctor2ProfileId}`)
+      .patch(`/doctors/${doctor2ProfileId}`)
       .set('Authorization', `Bearer ${doctor1Token}`)
       .send({ name: 'Unauthorized Update' })
       .expect(403);
@@ -154,7 +154,7 @@ describe('E2E P0 - RBAC', () => {
     const suffix = randomUUID().slice(0, 8);
 
     await request(app.getHttpServer())
-      .patch(`/medicos/${doctor2ProfileId}`)
+      .patch(`/doctors/${doctor2ProfileId}`)
       .set('Authorization', `Bearer ${adminToken}`)
       .send({ name: `Admin Updated ${suffix}` })
       .expect(200);

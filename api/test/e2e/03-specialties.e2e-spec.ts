@@ -72,12 +72,12 @@ describe('E2E P1 - Specialties', () => {
     await app.close();
   });
 
-  it('should create specialty (POST /especialidades)', async () => {
+  it('should create specialty (POST /specialties)', async () => {
     const suffix = randomUUID().slice(0, 8);
     specialtyCode = `SPEC-${suffix}`;
 
     const res = await request(app.getHttpServer())
-      .post('/especialidades')
+      .post('/specialties')
       .set('Authorization', `Bearer ${adminToken}`)
       .send({ code: specialtyCode, name: `Specialty ${suffix}` })
       .expect(201);
@@ -88,9 +88,9 @@ describe('E2E P1 - Specialties', () => {
     createdSpecialtyIds.push(specialtyId);
   });
 
-  it('should list active specialties (GET /especialidades)', async () => {
+  it('should list active specialties (GET /specialties)', async () => {
     const res = await request(app.getHttpServer())
-      .get('/especialidades')
+      .get('/specialties')
       .set('Authorization', `Bearer ${patientToken}`)
       .expect(200);
 
@@ -99,9 +99,9 @@ describe('E2E P1 - Specialties', () => {
     expect(ids).toContain(specialtyId);
   });
 
-  it('should fetch specialty by id (GET /especialidades/:id)', async () => {
+  it('should fetch specialty by id (GET /specialties/:id)', async () => {
     const res = await request(app.getHttpServer())
-      .get(`/especialidades/${specialtyId}`)
+      .get(`/specialties/${specialtyId}`)
       .set('Authorization', `Bearer ${patientToken}`)
       .expect(200);
 
@@ -109,9 +109,9 @@ describe('E2E P1 - Specialties', () => {
     expect(res.body.code).toBe(specialtyCode);
   });
 
-  it('should update specialty (PATCH /especialidades/:id)', async () => {
+  it('should update specialty (PATCH /specialties/:id)', async () => {
     const res = await request(app.getHttpServer())
-      .patch(`/especialidades/${specialtyId}`)
+      .patch(`/specialties/${specialtyId}`)
       .set('Authorization', `Bearer ${adminToken}`)
       .send({ name: 'Updated Specialty Name' })
       .expect(200);
@@ -119,16 +119,16 @@ describe('E2E P1 - Specialties', () => {
     expect(res.body.name).toBe('Updated Specialty Name');
   });
 
-  it('should soft delete specialty (DELETE /especialidades/:id)', async () => {
+  it('should soft delete specialty (DELETE /specialties/:id)', async () => {
     await request(app.getHttpServer())
-      .delete(`/especialidades/${specialtyId}`)
+      .delete(`/specialties/${specialtyId}`)
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(204);
   });
 
   it('should not list soft-deleted specialty', async () => {
     const res = await request(app.getHttpServer())
-      .get('/especialidades')
+      .get('/specialties')
       .set('Authorization', `Bearer ${patientToken}`)
       .expect(200);
 
@@ -138,7 +138,7 @@ describe('E2E P1 - Specialties', () => {
 
   it('should return not found for GET by id of soft-deleted specialty', async () => {
     await request(app.getHttpServer())
-      .get(`/especialidades/${specialtyId}`)
+      .get(`/specialties/${specialtyId}`)
       .set('Authorization', `Bearer ${patientToken}`)
       .expect(404);
   });

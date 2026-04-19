@@ -77,7 +77,7 @@ describe('E2E P1 - Health Plans', () => {
     healthPlanCode = `HP-${suffix}`;
 
     const res = await request(app.getHttpServer())
-      .post('/planos')
+      .post('/health-plans')
       .set('Authorization', `Bearer ${adminToken}`)
       .send({ code: healthPlanCode, description: `Health Plan ${suffix}`, phone: '11999999999' })
       .expect(201);
@@ -91,7 +91,7 @@ describe('E2E P1 - Health Plans', () => {
   it('should return 403 for non-admin creating health plan', async () => {
     const suffix = randomUUID().slice(0, 8);
     await request(app.getHttpServer())
-      .post('/planos')
+      .post('/health-plans')
       .set('Authorization', `Bearer ${patientToken}`)
       .send({ code: `HP-DENIED-${suffix}`, description: `Denied ${suffix}` })
       .expect(403);
@@ -99,7 +99,7 @@ describe('E2E P1 - Health Plans', () => {
 
   it('should list active health plans', async () => {
     const res = await request(app.getHttpServer())
-      .get('/planos')
+      .get('/health-plans')
       .set('Authorization', `Bearer ${patientToken}`)
       .expect(200);
 
@@ -110,7 +110,7 @@ describe('E2E P1 - Health Plans', () => {
 
   it('should fetch health plan by id', async () => {
     const res = await request(app.getHttpServer())
-      .get(`/planos/${healthPlanId}`)
+      .get(`/health-plans/${healthPlanId}`)
       .set('Authorization', `Bearer ${patientToken}`)
       .expect(200);
 
@@ -120,7 +120,7 @@ describe('E2E P1 - Health Plans', () => {
 
   it('should update health plan with authorized role', async () => {
     const res = await request(app.getHttpServer())
-      .patch(`/planos/${healthPlanId}`)
+      .patch(`/health-plans/${healthPlanId}`)
       .set('Authorization', `Bearer ${adminToken}`)
       .send({ description: 'Updated Description' })
       .expect(200);
@@ -130,14 +130,14 @@ describe('E2E P1 - Health Plans', () => {
 
   it('should soft delete health plan with authorized role', async () => {
     await request(app.getHttpServer())
-      .delete(`/planos/${healthPlanId}`)
+      .delete(`/health-plans/${healthPlanId}`)
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(204);
   });
 
   it('should not list soft-deleted health plan', async () => {
     const res = await request(app.getHttpServer())
-      .get('/planos')
+      .get('/health-plans')
       .set('Authorization', `Bearer ${patientToken}`)
       .expect(200);
 
@@ -147,7 +147,7 @@ describe('E2E P1 - Health Plans', () => {
 
   it('should return not found for GET by id of soft-deleted health plan', async () => {
     await request(app.getHttpServer())
-      .get(`/planos/${healthPlanId}`)
+      .get(`/health-plans/${healthPlanId}`)
       .set('Authorization', `Bearer ${patientToken}`)
       .expect(404);
   });

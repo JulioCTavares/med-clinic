@@ -98,7 +98,7 @@ describe('E2E P0 - Auth', () => {
     expect(refreshResponse.body.refresh_token).not.toBe(loginResponse.body.refresh_token);
 
     await request(app.getHttpServer())
-      .get('/medicos')
+      .get('/doctors')
       .set('Authorization', `Bearer ${refreshResponse.body.access_token}`)
       .expect(200);
 
@@ -182,7 +182,7 @@ describe('E2E P0 - Auth', () => {
     const token = loginRes.body.access_token;
 
     await request(app.getHttpServer())
-      .get('/medicos')
+      .get('/doctors')
       .set('Authorization', `Bearer ${token}`)
       .expect(200);
 
@@ -192,7 +192,7 @@ describe('E2E P0 - Auth', () => {
       .expect(204);
 
     await request(app.getHttpServer())
-      .get('/medicos')
+      .get('/doctors')
       .set('Authorization', `Bearer ${token}`)
       .expect(401);
   });

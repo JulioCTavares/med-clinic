@@ -108,7 +108,7 @@ describe('E2E P2 - Appointments', () => {
     const suffix = randomUUID().slice(0, 8);
 
     const res = await request(app.getHttpServer())
-      .post('/consultas')
+      .post('/appointments')
       .set('Authorization', `Bearer ${adminToken}`)
       .send({
         code: `APPT-${suffix}`,
@@ -129,7 +129,7 @@ describe('E2E P2 - Appointments', () => {
     const suffix = randomUUID().slice(0, 8);
 
     await request(app.getHttpServer())
-      .post('/consultas')
+      .post('/appointments')
       .set('Authorization', `Bearer ${adminToken}`)
       .send({
         code: `APPT-CONFLICT-DOC-${suffix}`,
@@ -164,7 +164,7 @@ describe('E2E P2 - Appointments', () => {
     const doctor2ProfileId = doc2Res.body.doctor.id;
 
     await request(app.getHttpServer())
-      .post('/consultas')
+      .post('/appointments')
       .set('Authorization', `Bearer ${adminToken}`)
       .send({
         code: `APPT-CONFLICT-PAT-${suffix}`,
@@ -179,7 +179,7 @@ describe('E2E P2 - Appointments', () => {
 
   it('should list appointments respecting authentication', async () => {
     const res = await request(app.getHttpServer())
-      .get('/consultas')
+      .get('/appointments')
       .set('Authorization', `Bearer ${patientToken}`)
       .expect(200);
 
@@ -190,7 +190,7 @@ describe('E2E P2 - Appointments', () => {
 
   it('should fetch appointment by id respecting authentication', async () => {
     const res = await request(app.getHttpServer())
-      .get(`/consultas/${appointmentId}`)
+      .get(`/appointments/${appointmentId}`)
       .set('Authorization', `Bearer ${doctorToken}`)
       .expect(200);
 
@@ -201,7 +201,7 @@ describe('E2E P2 - Appointments', () => {
 
   it('should update appointment status with valid transition', async () => {
     const res = await request(app.getHttpServer())
-      .patch(`/consultas/${appointmentId}`)
+      .patch(`/appointments/${appointmentId}`)
       .set('Authorization', `Bearer ${adminToken}`)
       .send({ status: 'confirmed' })
       .expect(200);
@@ -212,7 +212,7 @@ describe('E2E P2 - Appointments', () => {
   it('should soft delete appointment and remove it from active listing', async () => {
     const suffix = randomUUID().slice(0, 8);
     const createRes = await request(app.getHttpServer())
-      .post('/consultas')
+      .post('/appointments')
       .set('Authorization', `Bearer ${adminToken}`)
       .send({
         code: `APPT-DEL-${suffix}`,
@@ -227,12 +227,12 @@ describe('E2E P2 - Appointments', () => {
     const toDeleteId = createRes.body.id;
 
     await request(app.getHttpServer())
-      .delete(`/consultas/${toDeleteId}`)
+      .delete(`/appointments/${toDeleteId}`)
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(204);
 
     const listRes = await request(app.getHttpServer())
-      .get('/consultas')
+      .get('/appointments')
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200);
 
