@@ -2,6 +2,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useAuthStore } from '@/app/stores/auth.store'
 import { appointmentsApi } from '@/features/appointments/api'
+import { fetchAllPaginated } from '@/shared/lib/fetch-all-pages'
 import { mapApiError } from '@/shared/lib/error-mapper'
 import type { Appointment } from '@/entities/appointment'
 import AppPageHeader from '@/shared/ui/AppPageHeader.vue'
@@ -28,7 +29,9 @@ async function load() {
   loading.value = true
   error.value = ''
   try {
-    appointments.value = await appointmentsApi.list()
+    appointments.value = await fetchAllPaginated((page, limit) =>
+      appointmentsApi.list({ page, limit }),
+    )
   } catch (err) {
     error.value = mapApiError(err)
   } finally {

@@ -103,8 +103,9 @@ describe('E2E P1 - Procedures', () => {
       .set('Authorization', `Bearer ${patientToken}`)
       .expect(200);
 
-    expect(Array.isArray(res.body)).toBe(true);
-    const ids = (res.body as Array<{ id: string }>).map((p) => p.id);
+    expect(Array.isArray(res.body.data)).toBe(true);
+    expect(res.body.meta).toBeDefined();
+    const ids = (res.body.data as Array<{ id: string }>).map((p) => p.id);
     expect(ids).toContain(procedureId);
   });
 
@@ -141,7 +142,7 @@ describe('E2E P1 - Procedures', () => {
       .set('Authorization', `Bearer ${patientToken}`)
       .expect(200);
 
-    const ids = (res.body as Array<{ id: string }>).map((p) => p.id);
+    const ids = (res.body.data as Array<{ id: string }>).map((p) => p.id);
     expect(ids).not.toContain(procedureId);
   });
 

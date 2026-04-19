@@ -5,6 +5,7 @@ import { useQuasar } from 'quasar'
 import { useAuthStore } from '@/app/stores/auth.store'
 import { appointmentsApi } from '@/features/appointments/api'
 import { catalogApi } from '@/shared/lib/catalog-api'
+import { fetchAllPaginated } from '@/shared/lib/fetch-all-pages'
 import { mapApiError } from '@/shared/lib/error-mapper'
 import type { Specialty } from '@/entities/specialty'
 import type { Doctor } from '@/entities/doctor'
@@ -93,7 +94,10 @@ watch(selectedSpecialtyId, () => {
 async function loadCatalog() {
   loadingCatalog.value = true
   try {
-    const [specs, docs] = await Promise.all([catalogApi.specialties(), catalogApi.doctors()])
+    const [specs, docs] = await Promise.all([
+      fetchAllPaginated((page, limit) => catalogApi.specialties({ page, limit })),
+      fetchAllPaginated((page, limit) => catalogApi.doctors({ page, limit })),
+    ])
     specialties.value = specs
     allDoctors.value = docs.map((doctor) => {
       const normalizedSpecialtyId = getDoctorSpecialtyId(doctor)

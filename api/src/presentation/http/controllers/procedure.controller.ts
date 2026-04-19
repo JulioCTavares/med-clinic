@@ -9,6 +9,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -17,12 +18,14 @@ import {
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 import { Roles } from '@/infrastructure/security/decorators/roles.decorator';
 import { Role } from '@/core/domain/enums/role.enum';
 import { CreateProcedureDto } from '@/core/application/dtos/create-procedure.dto';
 import { UpdateProcedureDto } from '@/core/application/dtos/update-procedure.dto';
+import { ListProceduresDto } from '@/core/application/dtos/list-procedures.dto';
 import { FindAllProceduresUseCase } from '@/core/application/use-cases/find-all-procedures.use-case';
 import { FindProcedureByIdUseCase } from '@/core/application/use-cases/find-procedure-by-id.use-case';
 import { CreateProcedureUseCase } from '@/core/application/use-cases/create-procedure.use-case';
@@ -44,10 +47,14 @@ export class ProcedureController {
 
   @Get()
   @Roles(Role.ADMIN, Role.DOCTOR, Role.PATIENT)
-  @ApiOperation({ summary: 'Listar procedimentos' })
-  @ApiOkResponse({ description: 'Lista retornada com sucesso.' })
-  listAll() {
-    return this.findAll.execute();
+  @ApiOperation({ summary: 'Listar procedimentos com paginação e filtros' })
+  @ApiOkResponse({ description: 'Lista paginada retornada com sucesso.' })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'name', required: false, type: String })
+  @ApiQuery({ name: 'code', required: false, type: String })
+  listAll(@Query() query: ListProceduresDto) {
+    return this.findAll.execute(query);
   }
 
   @Get(':id')

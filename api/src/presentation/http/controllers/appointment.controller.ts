@@ -9,6 +9,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   ConflictException,
   Req,
 } from '@nestjs/common';
@@ -19,6 +20,7 @@ import {
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiQuery,
   ApiTags,
   ApiConflictResponse,
 } from '@nestjs/swagger';
@@ -27,6 +29,7 @@ import { Roles } from '@/infrastructure/security/decorators/roles.decorator';
 import { Role } from '@/core/domain/enums/role.enum';
 import { CreateAppointmentDto } from '@/core/application/dtos/create-appointment.dto';
 import { UpdateAppointmentDto } from '@/core/application/dtos/update-appointment.dto';
+import { ListAppointmentsDto } from '@/core/application/dtos/list-appointments.dto';
 import { CreateAppointmentUseCase } from '@/core/application/use-cases/create-appointment.use-case';
 import { FindAllAppointmentsUseCase } from '@/core/application/use-cases/find-all-appointments.use-case';
 import { FindAppointmentByIdUseCase } from '@/core/application/use-cases/find-appointment-by-id.use-case';
@@ -63,16 +66,22 @@ export class AppointmentController {
 
   @Get()
   @Roles(Role.ADMIN, Role.DOCTOR, Role.PATIENT)
-  @ApiOperation({ summary: 'Listar consultas — paciente vê apenas as próprias' })
-  @ApiOkResponse({ description: 'Lista retornada com sucesso.' })
-  listAll(@Req() req: FastifyRequest) {
+  @ApiOperation({ summary: 'Listar consultas com paginação e filtros — paciente vê apenas as próprias' })
+  @ApiOkResponse({ description: 'Lista paginada retornada com sucesso.' })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'status', required: false, type: String })
+  @ApiQuery({ name: 'doctorId', required: false, type: String })
+  @ApiQuery({ name: 'patientId', required: false, type: String })
+  @ApiQuery({ name: 'date', required: false, type: String })
+  listAll(@Req() req: FastifyRequest, @Query() query: ListAppointmentsDto) {
     if (req.user!.role === Role.PATIENT) {
-      return this.findMyUseCase.execute(req.user!.id).catch((err: unknown) => {
+      return this.findMyUseCase.execute(req.user!.id, query).catch((err: unknown) => {
         if (err instanceof ResourceNotFoundError) throw new NotFoundException(err.message);
         throw err;
       });
     }
-    return this.findAllUseCase.execute();
+    return this.findAllUseCase.execute(query);
   }
 
   @Get(':id')

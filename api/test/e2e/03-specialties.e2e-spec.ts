@@ -94,8 +94,9 @@ describe('E2E P1 - Specialties', () => {
       .set('Authorization', `Bearer ${patientToken}`)
       .expect(200);
 
-    expect(Array.isArray(res.body)).toBe(true);
-    const ids = (res.body as Array<{ id: string }>).map((s) => s.id);
+    expect(Array.isArray(res.body.data)).toBe(true);
+    expect(res.body.meta).toBeDefined();
+    const ids = (res.body.data as Array<{ id: string }>).map((s) => s.id);
     expect(ids).toContain(specialtyId);
   });
 
@@ -132,7 +133,7 @@ describe('E2E P1 - Specialties', () => {
       .set('Authorization', `Bearer ${patientToken}`)
       .expect(200);
 
-    const ids = (res.body as Array<{ id: string }>).map((s) => s.id);
+    const ids = (res.body.data as Array<{ id: string }>).map((s) => s.id);
     expect(ids).not.toContain(specialtyId);
   });
 

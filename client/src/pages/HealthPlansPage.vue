@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useQuasar } from 'quasar'
 import { useAuthStore } from '@/app/stores/auth.store'
 import { healthPlansApi } from '@/features/health-plans/api'
+import { fetchAllPaginated } from '@/shared/lib/fetch-all-pages'
 import { mapApiError } from '@/shared/lib/error-mapper'
 import type { HealthPlan } from '@/entities/health-plan'
 import AppPageHeader from '@/shared/ui/AppPageHeader.vue'
@@ -28,7 +29,7 @@ async function load() {
   error.value = ''
   try {
     const [all, mine] = await Promise.all([
-      healthPlansApi.list(),
+      fetchAllPaginated((page, limit) => healthPlansApi.list({ page, limit })),
       authStore.patientId ? healthPlansApi.listPatientPlans(authStore.patientId) : Promise.resolve([]),
     ])
     allPlans.value = all

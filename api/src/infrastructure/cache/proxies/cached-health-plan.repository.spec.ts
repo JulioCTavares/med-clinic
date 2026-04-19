@@ -1,8 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { CachedHealthPlanRepository } from './cached-health-plan.repository';
-import type { IHealthPlanRepository } from '@/core/domain/interfaces/health-plan-repository.interface';
+import type { IHealthPlanRepository, HealthPlanFilters } from '@/core/domain/interfaces/health-plan-repository.interface';
 import type { ICacheService } from '@/core/domain/interfaces/cache-service.interface';
 import { HealthPlanEntity } from '@/core/domain/entities/health-plan.entity';
+import type { PaginatedResult } from '@/common/types/paginated-result';
 import { CacheKeys } from '@/common/cache/cache-keys';
 
 const makeHealthPlan = (id = 'plan-uuid') =>
@@ -15,6 +16,11 @@ const makeHealthPlan = (id = 'plan-uuid') =>
     updatedAt: new Date(),
   });
 
+const makePaginated = (data: HealthPlanEntity[]): PaginatedResult<HealthPlanEntity> => ({
+  data,
+  meta: { total: data.length, page: 1, limit: 20, totalPages: 1 },
+});
+
 describe('CachedHealthPlanRepository', () => {
   let proxy: CachedHealthPlanRepository;
   let real: import('vitest').Mocked<IHealthPlanRepository>;
@@ -23,6 +29,7 @@ describe('CachedHealthPlanRepository', () => {
   beforeEach(() => {
     real = {
       findAll: vi.fn(),
+      findPaginated: vi.fn(),
       findById: vi.fn(),
       create: vi.fn(),
       update: vi.fn(),
@@ -64,6 +71,20 @@ describe('CachedHealthPlanRepository', () => {
         1800,
       );
       expect(result).toEqual(plans);
+    });
+  });
+
+  describe('findPaginated', () => {
+    it('delegates directly to real repo without caching', async () => {
+      const params: HealthPlanFilters = { page: 1, limit: 10 };
+      const paginated = makePaginated([makeHealthPlan()]);
+      real.findPaginated.mockResolvedValue(paginated);
+
+      const result = await proxy.findPaginated(params);
+
+      expect(real.findPaginated).toHaveBeenCalledWith(params);
+      expect(cache.get).not.toHaveBeenCalled();
+      expect(result).toEqual(paginated);
     });
   });
 
