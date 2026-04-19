@@ -16,6 +16,8 @@ import { DoctorModule } from '@/presentation/modules/doctor.module';
 import { PatientModule } from '@/presentation/modules/patient.module';
 import { AppointmentModule } from '@/presentation/modules/appointment.module';
 import { PatientHealthPlanModule } from '@/presentation/modules/patient-health-plan.module';
+import { HealthModule } from '@/presentation/modules/health.module';
+import { UserModule } from '@/presentation/modules/user.module';
 
 @Module({
   imports: [
@@ -30,6 +32,7 @@ import { PatientHealthPlanModule } from '@/presentation/modules/patient-health-p
           { name: 'default', ttl: 60_000, limit: 60 },
         ],
         storage: new ThrottlerStorageRedisService(redis),
+        skipIf: () => process.env.NODE_ENV === 'test',
       }),
     }),
     AuthModule,
@@ -40,6 +43,8 @@ import { PatientHealthPlanModule } from '@/presentation/modules/patient-health-p
     PatientModule,
     AppointmentModule,
     PatientHealthPlanModule,
+    HealthModule,
+    UserModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },
