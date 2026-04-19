@@ -16,10 +16,14 @@
     "test": "vitest run --config vitest.config.mts",
     "test:watch": "vitest --config vitest.config.mts",
     "test:cov": "vitest run --coverage --config vitest.config.mts",
-    "test:e2e": "vitest run --config ./vitest.e2e.config.mts",
+    "test:e2e:setup": "sh ./scripts/e2e-db-setup.sh",
+    "test:e2e:teardown": "sh ./scripts/e2e-db-teardown.sh",
+    "test:e2e:run": "vitest run --config ./vitest.e2e.config.mts",
+    "test:e2e": "sh ./scripts/e2e-run-with-cleanup.sh",
     "drizzle:generate": "npx drizzle-kit generate",
     "drizzle:migrate": "npx drizzle-kit migrate",
-    "drizzle:studio": "npx drizzle-kit studio"
+    "drizzle:studio": "npx drizzle-kit studio",
+    "seed": "ts-node -r tsconfig-paths/register --project tsconfig.json scripts/seed.ts"
   },
   "dependencies": {
     "@fastify/cookie": "^11.0.2",
