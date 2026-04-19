@@ -1,8 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { CachedProcedureRepository } from './cached-procedure.repository';
-import type { IProcedureRepository } from '@/core/domain/interfaces/procedure-repository.interface';
+import type { IProcedureRepository, ProcedureFilters } from '@/core/domain/interfaces/procedure-repository.interface';
 import type { ICacheService } from '@/core/domain/interfaces/cache-service.interface';
 import { ProcedureEntity } from '@/core/domain/entities/procedure.entity';
+import type { PaginatedResult } from '@/common/types/paginated-result';
 import { CacheKeys } from '@/common/cache/cache-keys';
 
 const makeProcedure = (id = 'proc-uuid') =>
@@ -15,6 +16,11 @@ const makeProcedure = (id = 'proc-uuid') =>
     updatedAt: new Date(),
   });
 
+const makePaginated = (data: ProcedureEntity[]): PaginatedResult<ProcedureEntity> => ({
+  data,
+  meta: { total: data.length, page: 1, limit: 20, totalPages: 1 },
+});
+
 describe('CachedProcedureRepository', () => {
   let proxy: CachedProcedureRepository;
   let real: import('vitest').Mocked<IProcedureRepository>;
@@ -23,6 +29,7 @@ describe('CachedProcedureRepository', () => {
   beforeEach(() => {
     real = {
       findAll: vi.fn(),
+      findPaginated: vi.fn(),
       findById: vi.fn(),
       create: vi.fn(),
       update: vi.fn(),
@@ -64,6 +71,20 @@ describe('CachedProcedureRepository', () => {
         1800,
       );
       expect(result).toEqual(procedures);
+    });
+  });
+
+  describe('findPaginated', () => {
+    it('delegates directly to real repo without caching', async () => {
+      const params: ProcedureFilters = { page: 1, limit: 10 };
+      const paginated = makePaginated([makeProcedure()]);
+      real.findPaginated.mockResolvedValue(paginated);
+
+      const result = await proxy.findPaginated(params);
+
+      expect(real.findPaginated).toHaveBeenCalledWith(params);
+      expect(cache.get).not.toHaveBeenCalled();
+      expect(result).toEqual(paginated);
     });
   });
 

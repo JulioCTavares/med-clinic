@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
-import type { IDoctorRepository } from '@/core/domain/interfaces/doctor-repository.interface';
+import type { IDoctorRepository, DoctorFilters } from '@/core/domain/interfaces/doctor-repository.interface';
 import type { DoctorEntity } from '@/core/domain/entities/doctor.entity';
+import type { PaginatedResult } from '@/common/types/paginated-result';
 import { CACHE_SERVICE } from '@/core/domain/interfaces/cache-service.interface';
 import type { ICacheService } from '@/core/domain/interfaces/cache-service.interface';
 import { CacheKeys } from '@/common/cache/cache-keys';
@@ -22,6 +23,10 @@ export class CachedDoctorRepository implements IDoctorRepository {
     const entities = await this.real.findAll();
     await this.cache.set(CacheKeys.medicoList(), JSON.stringify(entities), TTL_LIST);
     return entities;
+  }
+
+  findPaginated(params: DoctorFilters): Promise<PaginatedResult<DoctorEntity>> {
+    return this.real.findPaginated(params);
   }
 
   async findById(id: string): Promise<DoctorEntity | null> {

@@ -1,8 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { CachedSpecialtyRepository } from './cached-specialty.repository';
-import type { ISpecialtyRepository } from '@/core/domain/interfaces/specialty-repository.interface';
+import type { ISpecialtyRepository, SpecialtyFilters } from '@/core/domain/interfaces/specialty-repository.interface';
 import type { ICacheService } from '@/core/domain/interfaces/cache-service.interface';
 import { SpecialtyEntity } from '@/core/domain/entities/specialty.entity';
+import type { PaginatedResult } from '@/common/types/paginated-result';
 import { CacheKeys } from '@/common/cache/cache-keys';
 
 const makeSpecialty = (id = 'spec-uuid') =>
@@ -14,6 +15,11 @@ const makeSpecialty = (id = 'spec-uuid') =>
     updatedAt: new Date(),
   });
 
+const makePaginated = (data: SpecialtyEntity[]): PaginatedResult<SpecialtyEntity> => ({
+  data,
+  meta: { total: data.length, page: 1, limit: 20, totalPages: 1 },
+});
+
 describe('CachedSpecialtyRepository', () => {
   let proxy: CachedSpecialtyRepository;
   let real: import('vitest').Mocked<ISpecialtyRepository>;
@@ -22,6 +28,7 @@ describe('CachedSpecialtyRepository', () => {
   beforeEach(() => {
     real = {
       findAll: vi.fn(),
+      findPaginated: vi.fn(),
       findById: vi.fn(),
       create: vi.fn(),
       update: vi.fn(),
@@ -63,6 +70,20 @@ describe('CachedSpecialtyRepository', () => {
         3600,
       );
       expect(result).toEqual(specialties);
+    });
+  });
+
+  describe('findPaginated', () => {
+    it('delegates directly to real repo without caching', async () => {
+      const params: SpecialtyFilters = { page: 1, limit: 10 };
+      const paginated = makePaginated([makeSpecialty()]);
+      real.findPaginated.mockResolvedValue(paginated);
+
+      const result = await proxy.findPaginated(params);
+
+      expect(real.findPaginated).toHaveBeenCalledWith(params);
+      expect(cache.get).not.toHaveBeenCalled();
+      expect(result).toEqual(paginated);
     });
   });
 

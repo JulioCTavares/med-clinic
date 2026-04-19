@@ -1,8 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { CachedDoctorRepository } from './cached-doctor.repository';
-import type { IDoctorRepository } from '@/core/domain/interfaces/doctor-repository.interface';
+import type { IDoctorRepository, DoctorFilters } from '@/core/domain/interfaces/doctor-repository.interface';
 import type { ICacheService } from '@/core/domain/interfaces/cache-service.interface';
 import { DoctorEntity } from '@/core/domain/entities/doctor.entity';
+import type { PaginatedResult } from '@/common/types/paginated-result';
 import { CacheKeys } from '@/common/cache/cache-keys';
 
 const makeDoctor = (id = 'doctor-uuid') =>
@@ -16,6 +17,11 @@ const makeDoctor = (id = 'doctor-uuid') =>
     updatedAt: new Date(),
   });
 
+const makePaginated = (data: DoctorEntity[]): PaginatedResult<DoctorEntity> => ({
+  data,
+  meta: { total: data.length, page: 1, limit: 20, totalPages: 1 },
+});
+
 describe('CachedDoctorRepository', () => {
   let proxy: CachedDoctorRepository;
   let real: import('vitest').Mocked<IDoctorRepository>;
@@ -24,6 +30,7 @@ describe('CachedDoctorRepository', () => {
   beforeEach(() => {
     real = {
       findAll: vi.fn(),
+      findPaginated: vi.fn(),
       findById: vi.fn(),
       create: vi.fn(),
       update: vi.fn(),
@@ -65,6 +72,20 @@ describe('CachedDoctorRepository', () => {
         300,
       );
       expect(result).toEqual(doctors);
+    });
+  });
+
+  describe('findPaginated', () => {
+    it('delegates directly to real repo without caching', async () => {
+      const params: DoctorFilters = { page: 1, limit: 10 };
+      const paginated = makePaginated([makeDoctor()]);
+      real.findPaginated.mockResolvedValue(paginated);
+
+      const result = await proxy.findPaginated(params);
+
+      expect(real.findPaginated).toHaveBeenCalledWith(params);
+      expect(cache.get).not.toHaveBeenCalled();
+      expect(result).toEqual(paginated);
     });
   });
 

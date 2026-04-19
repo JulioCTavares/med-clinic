@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
-import type { IProcedureRepository } from '@/core/domain/interfaces/procedure-repository.interface';
+import type { IProcedureRepository, ProcedureFilters } from '@/core/domain/interfaces/procedure-repository.interface';
 import type { ProcedureEntity } from '@/core/domain/entities/procedure.entity';
+import type { PaginatedResult } from '@/common/types/paginated-result';
 import { CACHE_SERVICE } from '@/core/domain/interfaces/cache-service.interface';
 import type { ICacheService } from '@/core/domain/interfaces/cache-service.interface';
 import { CacheKeys } from '@/common/cache/cache-keys';
@@ -21,6 +22,10 @@ export class CachedProcedureRepository implements IProcedureRepository {
     const entities = await this.real.findAll();
     await this.cache.set(CacheKeys.procedimentoList(), JSON.stringify(entities), TTL);
     return entities;
+  }
+
+  findPaginated(params: ProcedureFilters): Promise<PaginatedResult<ProcedureEntity>> {
+    return this.real.findPaginated(params);
   }
 
   async findById(id: string): Promise<ProcedureEntity | null> {
