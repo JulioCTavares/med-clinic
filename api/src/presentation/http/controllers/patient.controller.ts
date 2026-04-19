@@ -8,6 +8,7 @@ import {
   NotFoundException,
   Param,
   Patch,
+  Req,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -17,11 +18,13 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import type { FastifyRequest } from 'fastify';
 import { Roles } from '@/infrastructure/security/decorators/roles.decorator';
 import { Role } from '@/core/domain/enums/role.enum';
 import { UpdatePatientDto } from '@/core/application/dtos/update-patient.dto';
 import { FindAllPatientsUseCase } from '@/core/application/use-cases/find-all-patients.use-case';
 import { FindPatientByIdUseCase } from '@/core/application/use-cases/find-patient-by-id.use-case';
+import { FindPatientByUserIdUseCase } from '@/core/application/use-cases/find-patient-by-user-id.use-case';
 import { UpdatePatientUseCase } from '@/core/application/use-cases/update-patient.use-case';
 import { DeletePatientUseCase } from '@/core/application/use-cases/delete-patient.use-case';
 import { ResourceNotFoundError } from '@/core/application/errors/application.error';
@@ -33,9 +36,23 @@ export class PatientController {
   constructor(
     private readonly findAll: FindAllPatientsUseCase,
     private readonly findById: FindPatientByIdUseCase,
+    private readonly findByUserId: FindPatientByUserIdUseCase,
     private readonly update: UpdatePatientUseCase,
     private readonly remove: DeletePatientUseCase,
   ) {}
+
+  @Get('me')
+  @Roles(Role.PATIENT)
+  @ApiOperation({ summary: 'Retornar perfil do paciente autenticado' })
+  @ApiOkResponse({ description: 'Perfil retornado com sucesso.' })
+  @ApiNotFoundResponse({ description: 'Paciente não encontrado para este usuário.' })
+  async getMe(@Req() req: FastifyRequest) {
+    const { id: userId } = req.user!;
+    return this.findByUserId.execute(userId).catch((err: unknown) => {
+      if (err instanceof ResourceNotFoundError) throw new NotFoundException(err.message);
+      throw err;
+    });
+  }
 
   @Get()
   @Roles(Role.ADMIN, Role.DOCTOR)

@@ -10,6 +10,7 @@ import {
   Patch,
   Post,
   ConflictException,
+  Req,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -21,6 +22,7 @@ import {
   ApiTags,
   ApiConflictResponse,
 } from '@nestjs/swagger';
+import type { FastifyRequest } from 'fastify';
 import { Roles } from '@/infrastructure/security/decorators/roles.decorator';
 import { Role } from '@/core/domain/enums/role.enum';
 import { CreateAppointmentDto } from '@/core/application/dtos/create-appointment.dto';
@@ -28,6 +30,7 @@ import { UpdateAppointmentDto } from '@/core/application/dtos/update-appointment
 import { CreateAppointmentUseCase } from '@/core/application/use-cases/create-appointment.use-case';
 import { FindAllAppointmentsUseCase } from '@/core/application/use-cases/find-all-appointments.use-case';
 import { FindAppointmentByIdUseCase } from '@/core/application/use-cases/find-appointment-by-id.use-case';
+import { FindMyAppointmentsUseCase } from '@/core/application/use-cases/find-my-appointments.use-case';
 import { UpdateAppointmentUseCase } from '@/core/application/use-cases/update-appointment.use-case';
 import { DeleteAppointmentUseCase } from '@/core/application/use-cases/delete-appointment.use-case';
 import { AppointmentConflictError, ResourceNotFoundError } from '@/core/application/errors/application.error';
@@ -40,12 +43,13 @@ export class AppointmentController {
     private readonly createUseCase: CreateAppointmentUseCase,
     private readonly findAllUseCase: FindAllAppointmentsUseCase,
     private readonly findByIdUseCase: FindAppointmentByIdUseCase,
+    private readonly findMyUseCase: FindMyAppointmentsUseCase,
     private readonly updateUseCase: UpdateAppointmentUseCase,
     private readonly deleteUseCase: DeleteAppointmentUseCase,
   ) {}
 
   @Post()
-  @Roles(Role.ADMIN, Role.DOCTOR)
+  @Roles(Role.ADMIN, Role.DOCTOR, Role.PATIENT)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Agendar consulta' })
   @ApiCreatedResponse({ description: 'Consulta agendada com sucesso.' })
@@ -59,9 +63,15 @@ export class AppointmentController {
 
   @Get()
   @Roles(Role.ADMIN, Role.DOCTOR, Role.PATIENT)
-  @ApiOperation({ summary: 'Listar consultas' })
+  @ApiOperation({ summary: 'Listar consultas — paciente vê apenas as próprias' })
   @ApiOkResponse({ description: 'Lista retornada com sucesso.' })
-  listAll() {
+  listAll(@Req() req: FastifyRequest) {
+    if (req.user!.role === Role.PATIENT) {
+      return this.findMyUseCase.execute(req.user!.id).catch((err: unknown) => {
+        if (err instanceof ResourceNotFoundError) throw new NotFoundException(err.message);
+        throw err;
+      });
+    }
     return this.findAllUseCase.execute();
   }
 
