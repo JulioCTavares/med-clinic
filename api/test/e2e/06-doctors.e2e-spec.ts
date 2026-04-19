@@ -104,8 +104,9 @@ describe('E2E P2 - Doctors', () => {
       .set('Authorization', `Bearer ${doctorToken}`)
       .expect(200);
 
-    expect(Array.isArray(res.body)).toBe(true);
-    const ids = (res.body as Array<{ id: string }>).map((d) => d.id);
+    expect(Array.isArray(res.body.data)).toBe(true);
+    expect(res.body.meta).toBeDefined();
+    const ids = (res.body.data as Array<{ id: string }>).map((d) => d.id);
     expect(ids).toContain(doctorProfileId);
   });
 

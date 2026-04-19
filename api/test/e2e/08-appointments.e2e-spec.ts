@@ -183,8 +183,9 @@ describe('E2E P2 - Appointments', () => {
       .set('Authorization', `Bearer ${patientToken}`)
       .expect(200);
 
-    expect(Array.isArray(res.body)).toBe(true);
-    const ids = (res.body as Array<{ id: string }>).map((a) => a.id);
+    expect(Array.isArray(res.body.data)).toBe(true);
+    expect(res.body.meta).toBeDefined();
+    const ids = (res.body.data as Array<{ id: string }>).map((a) => a.id);
     expect(ids).toContain(appointmentId);
   });
 
@@ -236,7 +237,7 @@ describe('E2E P2 - Appointments', () => {
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200);
 
-    const ids = (listRes.body as Array<{ id: string }>).map((a) => a.id);
+    const ids = (listRes.body.data as Array<{ id: string }>).map((a) => a.id);
     expect(ids).not.toContain(toDeleteId);
   });
 });
