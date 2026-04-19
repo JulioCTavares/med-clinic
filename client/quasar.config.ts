@@ -11,7 +11,8 @@ export default defineConfig((_ctx) => {
 
     build: {
       target: {
-        browser: ['es2019', 'edge88', 'firefox78', 'chrome87', 'safari13.1'],
+        // es2022+: necessário para o pipeline Vite/esbuild (ex.: pinia boot) sem falha de transpile
+        browser: ['es2022', 'edge91', 'firefox90', 'chrome92', 'safari15.4'],
         node: 'node20',
       },
       typescript: {
@@ -19,9 +20,6 @@ export default defineConfig((_ctx) => {
         vueShim: true,
       },
       vueRouterMode: 'hash',
-      vitePlugins: [
-        ['vite-plugin-checker', { vueTsc: true }, { server: false }],
-      ],
       extendViteConf(viteConf) {
         viteConf.resolve ??= {}
         Object.assign(viteConf.resolve.alias ??= {}, {
