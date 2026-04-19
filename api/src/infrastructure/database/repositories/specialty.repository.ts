@@ -1,7 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { eq, and } from 'drizzle-orm';
-import { ISpecialtyRepository } from '@/core/domain/interfaces/specialty-repository.interface';
+import { eq, and, ilike, count } from 'drizzle-orm';
+import { ISpecialtyRepository, SpecialtyFilters } from '@/core/domain/interfaces/specialty-repository.interface';
 import { SpecialtyEntity } from '@/core/domain/entities/specialty.entity';
+import type { PaginatedResult } from '@/common/types/paginated-result';
 import { DRIZZLE_DB } from '@/infrastructure/database/database.module';
 import type { DrizzleDB } from '@/infrastructure/database/drizzle/drizzle.factory';
 import { specialties } from '@/infrastructure/database/drizzle/schemas';
@@ -25,6 +26,23 @@ export class DrizzleSpecialtyRepository implements ISpecialtyRepository {
   async findAll(): Promise<SpecialtyEntity[]> {
     const rows = await this.db.select().from(specialties).where(active(specialties));
     return rows.map((r) => this.toEntity(r));
+  }
+
+  async findPaginated(params: SpecialtyFilters): Promise<PaginatedResult<SpecialtyEntity>> {
+    const conditions = [active(specialties)];
+    if (params.name) conditions.push(ilike(specialties.name, `%${params.name}%`));
+    if (params.code) conditions.push(ilike(specialties.code, `%${params.code}%`));
+
+    const where = and(...conditions);
+    const offset = (params.page - 1) * params.limit;
+
+    const [{ total }] = await this.db.select({ total: count() }).from(specialties).where(where);
+    const rows = await this.db.select().from(specialties).where(where).limit(params.limit).offset(offset);
+
+    return {
+      data: rows.map((r) => this.toEntity(r)),
+      meta: { total, page: params.page, limit: params.limit, totalPages: Math.ceil(total / params.limit) },
+    };
   }
 
   async findById(id: string): Promise<SpecialtyEntity | null> {

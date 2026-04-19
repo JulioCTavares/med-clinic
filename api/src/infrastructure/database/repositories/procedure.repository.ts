@@ -1,7 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { eq, and } from 'drizzle-orm';
-import { IProcedureRepository } from '@/core/domain/interfaces/procedure-repository.interface';
+import { eq, and, ilike, count } from 'drizzle-orm';
+import { IProcedureRepository, ProcedureFilters } from '@/core/domain/interfaces/procedure-repository.interface';
 import { ProcedureEntity } from '@/core/domain/entities/procedure.entity';
+import type { PaginatedResult } from '@/common/types/paginated-result';
 import { DRIZZLE_DB } from '@/infrastructure/database/database.module';
 import type { DrizzleDB } from '@/infrastructure/database/drizzle/drizzle.factory';
 import { procedures } from '@/infrastructure/database/drizzle/schemas';
@@ -26,6 +27,23 @@ export class DrizzleProcedureRepository implements IProcedureRepository {
   async findAll(): Promise<ProcedureEntity[]> {
     const rows = await this.db.select().from(procedures).where(active(procedures));
     return rows.map((r) => this.toEntity(r));
+  }
+
+  async findPaginated(params: ProcedureFilters): Promise<PaginatedResult<ProcedureEntity>> {
+    const conditions = [active(procedures)];
+    if (params.name) conditions.push(ilike(procedures.name, `%${params.name}%`));
+    if (params.code) conditions.push(ilike(procedures.code, `%${params.code}%`));
+
+    const where = and(...conditions);
+    const offset = (params.page - 1) * params.limit;
+
+    const [{ total }] = await this.db.select({ total: count() }).from(procedures).where(where);
+    const rows = await this.db.select().from(procedures).where(where).limit(params.limit).offset(offset);
+
+    return {
+      data: rows.map((r) => this.toEntity(r)),
+      meta: { total, page: params.page, limit: params.limit, totalPages: Math.ceil(total / params.limit) },
+    };
   }
 
   async findById(id: string): Promise<ProcedureEntity | null> {

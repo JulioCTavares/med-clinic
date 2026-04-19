@@ -1,8 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { eq, and, or, ne } from 'drizzle-orm';
-import { IAppointmentRepository, AppointmentView } from '@/core/domain/interfaces/appointment-repository.interface';
+import { eq, and, or, ne, count } from 'drizzle-orm';
+import { IAppointmentRepository, AppointmentView, AppointmentFilters } from '@/core/domain/interfaces/appointment-repository.interface';
 import { AppointmentEntity } from '@/core/domain/entities/appointment.entity';
 import { AppointmentStatus } from '@/core/domain/enums/appointment-status.enum';
+import type { PaginatedResult } from '@/common/types/paginated-result';
 import { DRIZZLE_DB } from '@/infrastructure/database/database.module';
 import type { DrizzleDB } from '@/infrastructure/database/drizzle/drizzle.factory';
 import { appointments, doctors } from '@/infrastructure/database/drizzle/schemas';
@@ -66,6 +67,15 @@ export class DrizzleAppointmentRepository implements IAppointmentRepository {
     };
   }
 
+  private buildAppointmentConditions(params: Omit<AppointmentFilters, 'page' | 'limit'>) {
+    const conditions = [active(appointments)];
+    if (params.status) conditions.push(eq(appointments.status, params.status));
+    if (params.doctorId) conditions.push(eq(appointments.doctorId, params.doctorId));
+    if (params.patientId) conditions.push(eq(appointments.patientId, params.patientId));
+    if (params.date) conditions.push(eq(appointments.date, params.date));
+    return conditions;
+  }
+
   async findAll(): Promise<AppointmentEntity[]> {
     const rows = await this.db
       .select()
@@ -83,6 +93,26 @@ export class DrizzleAppointmentRepository implements IAppointmentRepository {
       .where(active(appointments));
 
     return rows.map((r) => this.toView(r));
+  }
+
+  async findPaginatedWithDoctor(params: AppointmentFilters): Promise<PaginatedResult<AppointmentView>> {
+    const conditions = this.buildAppointmentConditions(params);
+    const where = and(...conditions);
+    const offset = (params.page - 1) * params.limit;
+
+    const [{ total }] = await this.db.select({ total: count() }).from(appointments).where(where);
+    const rows = await this.db
+      .select(this.enrichedSelect)
+      .from(appointments)
+      .leftJoin(doctors, eq(appointments.doctorId, doctors.id))
+      .where(where)
+      .limit(params.limit)
+      .offset(offset);
+
+    return {
+      data: rows.map((r) => this.toView(r)),
+      meta: { total, page: params.page, limit: params.limit, totalPages: Math.ceil(total / params.limit) },
+    };
   }
 
   async findById(id: string): Promise<AppointmentEntity | null> {
@@ -112,6 +142,29 @@ export class DrizzleAppointmentRepository implements IAppointmentRepository {
       .where(and(eq(appointments.patientId, patientId), active(appointments)));
 
     return rows.map((r) => this.toView(r));
+  }
+
+  async findByPatientIdPaginated(patientId: string, params: AppointmentFilters): Promise<PaginatedResult<AppointmentView>> {
+    const conditions = [eq(appointments.patientId, patientId), active(appointments)];
+    if (params.status) conditions.push(eq(appointments.status, params.status));
+    if (params.date) conditions.push(eq(appointments.date, params.date));
+
+    const where = and(...conditions);
+    const offset = (params.page - 1) * params.limit;
+
+    const [{ total }] = await this.db.select({ total: count() }).from(appointments).where(where);
+    const rows = await this.db
+      .select(this.enrichedSelect)
+      .from(appointments)
+      .leftJoin(doctors, eq(appointments.doctorId, doctors.id))
+      .where(where)
+      .limit(params.limit)
+      .offset(offset);
+
+    return {
+      data: rows.map((r) => this.toView(r)),
+      meta: { total, page: params.page, limit: params.limit, totalPages: Math.ceil(total / params.limit) },
+    };
   }
 
   async findConflict(

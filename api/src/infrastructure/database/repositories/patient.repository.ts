@@ -1,7 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { eq, and } from 'drizzle-orm';
-import { IPatientRepository } from '@/core/domain/interfaces/patient-repository.interface';
+import { eq, and, ilike, count } from 'drizzle-orm';
+import { IPatientRepository, PatientFilters } from '@/core/domain/interfaces/patient-repository.interface';
 import { PatientEntity } from '@/core/domain/entities/patient.entity';
+import type { PaginatedResult } from '@/common/types/paginated-result';
 import { DRIZZLE_DB } from '@/infrastructure/database/database.module';
 import type { DrizzleDB } from '@/infrastructure/database/drizzle/drizzle.factory';
 import { patients } from '@/infrastructure/database/drizzle/schemas';
@@ -47,6 +48,22 @@ export class DrizzlePatientRepository implements IPatientRepository {
       .where(active(patients));
 
     return rows.map((r) => this.toEntity(r));
+  }
+
+  async findPaginated(params: PatientFilters): Promise<PaginatedResult<PatientEntity>> {
+    const conditions = [active(patients)];
+    if (params.name) conditions.push(ilike(patients.name, `%${params.name}%`));
+
+    const where = and(...conditions);
+    const offset = (params.page - 1) * params.limit;
+
+    const [{ total }] = await this.db.select({ total: count() }).from(patients).where(where);
+    const rows = await this.db.select().from(patients).where(where).limit(params.limit).offset(offset);
+
+    return {
+      data: rows.map((r) => this.toEntity(r)),
+      meta: { total, page: params.page, limit: params.limit, totalPages: Math.ceil(total / params.limit) },
+    };
   }
 
   async findById(id: string): Promise<PatientEntity | null> {
