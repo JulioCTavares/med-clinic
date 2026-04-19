@@ -1,6 +1,9 @@
 /**
  * Seed idempotente — popula o banco com dados de desenvolvimento.
- * Execução: pnpm seed  (ou: npx ts-node -r tsconfig-paths/register scripts/seed.ts)
+ *
+ * Uso:
+ *   pnpm seed           → insere apenas o que ainda não existe (idempotente)
+ *   pnpm seed --reset   → limpa o banco antes de popular (destrutivo)
  *
  * Credenciais de teste:
  *   Paciente 1: maria.silva@test.com  / Senha@123
@@ -326,10 +329,14 @@ async function seedPatientHealthPlans(
 // ──────────────────────────────────────────────
 
 async function main() {
-  console.log('🌱  Iniciando seed…\n');
+  const isReset = process.argv.includes('--reset');
+  console.log(`🌱  Iniciando seed${isReset ? ' (modo --reset)' : ''}…\n`);
 
-  await clearDatabase();
-  await clearCatalogCache();
+  if (isReset) {
+    await clearDatabase();
+    await clearCatalogCache();
+  }
+
   const specialtyIds = await seedSpecialties();
   const planIds = await seedHealthPlans();
   await seedProcedures();
