@@ -1,98 +1,245 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Med-Clinic API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+API REST para gestão de clínica médica, desenvolvida com **NestJS + Fastify**, seguindo **Clean Architecture**, princípios **SOLID** e **Design Patterns**.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+## Tecnologias
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+| Camada | Tecnologia |
+|--------|------------|
+| Framework | NestJS 11 + Fastify 5 |
+| Linguagem | TypeScript 5.7 |
+| Banco de Dados | PostgreSQL 16 |
+| ORM | Drizzle ORM |
+| Validação | Zod + nestjs-zod |
+| Autenticação | JWT (Access + Refresh Token) |
+| Hash de Senha | Argon2 |
+| Cache | Redis (ioredis) |
+| Rate Limiting | @nestjs/throttler + Redis |
+| Testes | Vitest (unitários + E2E) |
+| Infraestrutura | Docker + Docker Compose |
 
-## Project setup
+---
+
+## Funcionalidades
+
+- Cadastro e gestão de **pacientes**, **médicos**, **especialidades**, **planos de saúde** e **procedimentos**
+- **Agendamento de consultas** com detecção de conflitos de horário
+- **Autenticação JWT** com refresh token, rotação e logout com blacklist
+- **Controle de acesso por papéis** (admin, doctor, patient)
+- **Cache com Redis** via Proxy Pattern nos repositórios
+- **Rate limiting distribuído** por Redis (anti-brute-force nas rotas de auth)
+- **Soft delete** em todas as entidades
+- **Documentação Swagger** em `/api/docs`
+- Logs estruturados com Pino e rastreamento por `x-request-id`
+
+---
+
+## Papéis de Usuário
+
+| Role | Permissões |
+|------|------------|
+| `admin` | Acesso total ao sistema |
+| `doctor` | Gerencia consultas e procedimentos |
+| `patient` | Visualiza próprias consultas e planos |
+
+---
+
+## Rotas
+
+| Prefixo | Recurso |
+|---------|---------|
+| `POST /auth/register` | Cadastro de usuário |
+| `POST /auth/login` | Login (retorna access + refresh token) |
+| `POST /auth/refresh` | Renovação do access token |
+| `POST /auth/logout` | Logout (revoga tokens) |
+| `/doctors` | Gestão de médicos |
+| `/patients` | Gestão de pacientes |
+| `/appointments` | Agendamento de consultas |
+| `/specialties` | Catálogo de especialidades |
+| `/health-plans` | Catálogo de planos de saúde |
+| `/procedures` | Catálogo de procedimentos |
+| `/patients/:id/health-plans` | Vínculo paciente ↔ plano |
+
+A documentação completa das rotas está disponível em `/api/docs` (Swagger UI).
+
+---
+
+## Requisitos
+
+- Node.js >= 20
+- pnpm >= 9
+- Docker + Docker Compose
+
+---
+
+## Configuração do Ambiente
+
+Copie o arquivo de exemplo e preencha as variáveis:
 
 ```bash
-$ pnpm install
+cp .env.example .env
 ```
 
-## Compile and run the project
+### Variáveis de Ambiente
+
+| Variável | Descrição | Exemplo |
+|----------|-----------|---------|
+| `PORT` | Porta da API | `4000` |
+| `NODE_ENV` | Ambiente de execução | `development` |
+| `LOG_LEVEL` | Nível de log (pino) | `info` |
+| `CORS_ORIGIN` | URL do frontend permitida | `http://localhost:3000` |
+| `DATABASE_URL` | URL de conexão PostgreSQL | `postgres://user:pass@localhost:5432/db` |
+| `POSTGRES_USER` | Usuário do banco (Docker) | `postgres` |
+| `POSTGRES_PASSWORD` | Senha do banco (Docker) | `postgres` |
+| `POSTGRES_DB` | Nome do banco (Docker) | `med_clinic` |
+| `POSTGRES_PORT` | Porta do banco (Docker) | `5432` |
+| `JWT_SECRET` | Segredo do access token | *(string aleatória forte)* |
+| `JWT_EXPIRES_IN` | Expiração do access token | `15m` |
+| `REFRESH_TOKEN_SECRET` | Segredo do refresh token | *(string aleatória forte)* |
+| `REFRESH_TOKEN_EXPIRES_IN` | Expiração do refresh token | `7d` |
+| `REDIS_HOST` | Host do Redis | `localhost` |
+| `REDIS_PORT` | Porta do Redis | `6379` |
+| `COOKIE_SECRET` | Segredo dos cookies Fastify | *(string aleatória forte)* |
+
+---
+
+## Instalação e Execução
+
+### Desenvolvimento
 
 ```bash
-# development
-$ pnpm run start
+# Instalar dependências
+pnpm install
 
-# watch mode
-$ pnpm run start:dev
+# Subir PostgreSQL e Redis via Docker
+docker-compose --profile db up -d
 
-# production mode
-$ pnpm run start:prod
+# Gerar e aplicar migrations
+pnpm drizzle:generate
+pnpm drizzle:migrate
+
+# Iniciar servidor com hot-reload
+pnpm start:dev
 ```
 
-## Run tests
+A API estará disponível em `http://localhost:4000`.
+
+### Produção
 
 ```bash
-# unit tests
-$ pnpm run test
+# Build
+pnpm build
 
-# e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
+# Iniciar
+pnpm start:prod
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### Docker (stack completa)
 
 ```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
+# Subir API + PostgreSQL + Redis
+docker-compose --profile app up -d
+
+# Acompanhar logs
+docker-compose logs -f api
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+---
 
-## Resources
+## Scripts Disponíveis
 
-Check out a few resources that may come in handy when working with NestJS:
+| Script | Descrição |
+|--------|-----------|
+| `pnpm start:dev` | Servidor de desenvolvimento (hot-reload) |
+| `pnpm start:debug` | Modo debug |
+| `pnpm start:prod` | Servidor de produção (a partir do `dist/`) |
+| `pnpm build` | Compilação TypeScript |
+| `pnpm test` | Testes unitários |
+| `pnpm test:watch` | Testes unitários em modo watch |
+| `pnpm test:cov` | Testes com relatório de cobertura |
+| `pnpm test:e2e` | Testes end-to-end |
+| `pnpm lint` | ESLint com auto-fix |
+| `pnpm format` | Prettier |
+| `pnpm drizzle:generate` | Gerar arquivos de migration |
+| `pnpm drizzle:migrate` | Aplicar migrations |
+| `pnpm drizzle:studio` | Interface visual do banco (Drizzle Studio) |
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+---
 
-## Support
+## Testes
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+O projeto possui cobertura completa via **Vitest**:
 
-## Stay in touch
+- **40+ testes unitários** — use cases, repositórios, proxies de cache
+- **12 suites E2E** — fluxo de auth, RBAC, CRUD completo, validações e contratos de erro
+- `pnpm test` e `pnpm test:e2e` carregam automaticamente `.env.test` (ou `.env.test.example` como fallback).
+- `pnpm test:e2e` prepara o ambiente, roda os testes e remove o banco E2E ao final (mesmo em caso de falha).
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+```bash
+# Unitários
+pnpm test
 
-## License
+# E2E
+cp .env.test.example .env.test
+pnpm test:e2e
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+# Cobertura
+pnpm test:cov
+```
+
+### Setup E2E automatizado
+
+Se quiser preparar o ambiente sem rodar os testes:
+
+```bash
+pnpm test:e2e:setup
+```
+
+Esse comando:
+- sobe `postgres` e `redis` via Docker Compose (`--profile db`);
+- cria o banco `med_clinic_e2e` se ele ainda não existir.
+
+Para remover manualmente o banco E2E:
+
+```bash
+pnpm test:e2e:teardown
+```
+
+---
+
+## Arquitetura
+
+O projeto segue **Clean Architecture** com separação em três camadas:
+
+```
+src/
+├── core/
+│   ├── domain/
+│   │   ├── entities/        # Modelos de domínio com builder pattern
+│   │   ├── enums/           # Role, AppointmentStatus
+│   │   └── interfaces/      # Contratos de repositórios e serviços
+│   └── application/
+│       ├── use-cases/       # 72 casos de uso (regras de negócio)
+│       ├── dtos/            # Data Transfer Objects com validação Zod
+│       └── errors/          # Exceções de aplicação
+├── infrastructure/
+│   ├── database/
+│   │   ├── drizzle/         # Schemas, migrations, factory
+│   │   └── repositories/    # Implementações com Drizzle ORM
+│   ├── cache/
+│   │   ├── proxies/         # Proxy Pattern para cache nos repositórios
+│   │   └── redis/           # Módulo e serviço Redis
+│   └── security/
+│       ├── jwt/             # Adapter JWT + estratégia Passport
+│       ├── hashing/         # Adapter Argon2
+│       └── guards/          # JwtAuthGuard, RolesGuard
+└── presentation/
+    ├── modules/             # Módulos NestJS (um por domínio)
+    └── http/
+        ├── controllers/     # Controllers HTTP
+        └── filters/         # Filtro global de exceções
+```
+
+**Design Patterns aplicados:** Repository, Factory, Adapter, Proxy, Strategy.
